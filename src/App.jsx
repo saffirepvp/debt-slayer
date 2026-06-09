@@ -290,30 +290,16 @@ export default function DebtSlayer() {
     const systemPrompt = `You are ${advisor.name}, a ${advisor.style} debt-advisor character in a dark fantasy RPG called Debt Slayer. Stay in character with light medieval-fantasy flavor, but give GENUINELY useful, accurate personal-finance advice (avalanche vs snowball, interest math, prioritization). Keep replies under 120 words. The player's current debts ("bosses"): ${debtContext}. Total debt: $${totalDebt}.`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-5",
-          max_tokens: 1000,
-          system: systemPrompt,
-          messages: next.map((m) => ({ role: m.role, content: m.content })),
-        }),
+      const res = await fetch('/api/advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: next, systemPrompt })
       });
-      if (!res.ok) {
-        const errBody = await res.text();
-        throw new Error(`API ${res.status}: ${errBody.slice(0, 200)}`);
-      }
+      if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
-      const text =
-        data.content?.map((c) => (c.type === "text" ? c.text : "")).join("") ||
-        "The advisor falls silent...";
-      setChat((c) => [...c, { role: "assistant", content: text }]);
+      setChat((c) => [...c, { role: 'assistant', content: data.text }]);
     } catch (e) {
-      setChat((c) => [
-        ...c,
-        { role: "assistant", content: `⚠️ The mystic link falters: ${e.message}` },
-      ]);
+      setChat((c) => [...c, { role: 'assistant', content: `⚠️ The mystic link falters: ${e.message}` }]);
     } finally {
       setThinking(false);
     }
