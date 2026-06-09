@@ -885,7 +885,7 @@ input:focus { outline: 1px solid ${GOLD}; }
 `;
 
 const styles = {
-  root: { fontFamily: "'EB Garamond', serif", background: "radial-gradient(ellipse at top, #1a1218 0%, #0a0608 60%, #050304 100%)", minHeight: "100vh", color: "#e8e0d4" },
+  root: { fontFamily: "'EB Garamond', serif", background: "radial-gradient(ellipse at top, #1a1218 0%, #0a0608 60%, #050304 100%)", minHeight: "100vh", color: "#e8e0d4", overflowX: "hidden", width: "100%" },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 28px", borderBottom: `1px solid ${GOLD}33`, flexWrap: "wrap", gap: 16 },
   brand: { display: "flex", alignItems: "center", gap: 14 },
   brandMark: { fontSize: 38, color: GOLD, textShadow: `0 0 20px ${EMBER}` },
