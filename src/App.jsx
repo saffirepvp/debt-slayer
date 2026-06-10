@@ -68,9 +68,91 @@ function daysLeftInMonth() {
 }
 
 // ============================================================
+// LANDING PAGE — what strangers see before signing up
+// ============================================================
+function LandingPage({ onEnter }) {
+  return (
+    <div style={landing.page}>
+      <style>{css}</style>
+
+      {/* HERO */}
+      <div style={landing.hero} className="fade-in">
+        <div style={landing.heroMark}>⚔</div>
+        <h1 style={landing.heroTitle}>DEBT SLAYER</h1>
+        <p style={landing.heroTag}>Your debt is a monster.<br />Slay it.</p>
+        <p style={landing.heroSub}>
+          Turn every credit card, student loan, and car note into an RPG boss with an HP bar.
+          Every real payment you make is a strike. Watch your debts die, one by one.
+        </p>
+        <button style={landing.cta} onClick={onEnter}>🔥 BEGIN THE HUNT — FREE</button>
+        <p style={landing.ctaHint}>No card required · summon your first boss in 60 seconds</p>
+      </div>
+
+      {/* FEATURES */}
+      <div style={landing.featureGrid}>
+        <div style={landing.featureCard} className="boss-card">
+          <span style={{ fontSize: 44 }}>🩸</span>
+          <h3 style={landing.featureTitle}>Boss Battles</h3>
+          <p style={landing.featureText}>Your $4,200 credit card becomes "The Crimson Usurer" — a boss with HP, regeneration (its APR), and a death coming. Log payments to deal damage, land critical strikes, and earn the kill screen.</p>
+        </div>
+        <div style={landing.featureCard} className="boss-card">
+          <span style={{ fontSize: 44 }}>🗺</span>
+          <h3 style={landing.featureTitle}>The Battle Planner</h3>
+          <p style={landing.featureText}>Avalanche or Snowball? See your exact payoff order, your debt-free date, and precisely how much interest each strategy saves — calculated from your real balances and APRs.</p>
+        </div>
+        <div style={landing.featureCard} className="boss-card">
+          <span style={{ fontSize: 44 }}>🔮</span>
+          <h3 style={landing.featureTitle}>The AI War Council</h3>
+          <p style={landing.featureText}>Three advisors — a sage, a bard, and a knight — who know your actual debts and give real strategy in character. Ask which boss to strike first. They'll tell you why.</p>
+        </div>
+        <div style={landing.featureCard} className="boss-card">
+          <span style={{ fontSize: 44 }}>🏆</span>
+          <h3 style={landing.featureTitle}>Seasons & Streaks</h3>
+          <p style={landing.featureText}>Monthly themed seasons with damage goals, permanent badges, payment streaks with ranks from Squire to Legend, and achievements that actually mean something — you paid that off.</p>
+        </div>
+      </div>
+
+      {/* PRICING */}
+      <div style={landing.pricing} className="fade-in">
+        <h2 style={landing.pricingTitle}>Free to start. $4.99/mo for the full arsenal.</h2>
+        <p style={landing.pricingText}>
+          Free Slayers track 2 bosses and get 5 AI counsels.
+          The Slayer's Guild unlocks unlimited bosses, the Battle Planner, and unlimited counsel from all three advisors.
+        </p>
+        <button style={landing.cta} onClick={onEnter}>⚔ SUMMON YOUR FIRST BOSS</button>
+      </div>
+
+      <footer style={landing.footer}>
+        Debt Slayer · a dark fantasy money RPG
+        <br />Payoff projections are estimates only — not financial advice.
+      </footer>
+    </div>
+  );
+}
+
+const landing = {
+  page: { fontFamily: "'EB Garamond',serif", background: "radial-gradient(ellipse at top,#1a1218 0%,#0a0608 55%,#050304 100%)", minHeight: "100vh", color: "#e8e0d4", overflowX: "hidden" },
+  hero: { textAlign: "center", padding: "80px 24px 50px", maxWidth: 700, margin: "0 auto" },
+  heroMark: { fontSize: 64, color: GOLD, textShadow: `0 0 32px ${EMBER}` },
+  heroTitle: { fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 46, letterSpacing: 6, color: GOLD, margin: "10px 0 4px" },
+  heroTag: { fontFamily: "'Cinzel',serif", fontSize: 26, color: "#e8e0d4", lineHeight: 1.3, margin: "18px 0 14px" },
+  heroSub: { color: "#b8ac98", fontSize: 17, lineHeight: 1.7, maxWidth: 540, margin: "0 auto 30px" },
+  cta: { fontFamily: "'Cinzel',serif", background: `linear-gradient(135deg,${BLOOD},${EMBER})`, color: "#fff", border: "none", padding: "18px 36px", borderRadius: 6, fontWeight: 700, fontSize: 16, cursor: "pointer", letterSpacing: 2, boxShadow: `0 6px 32px ${BLOOD}aa` },
+  ctaHint: { color: "#7a7060", fontStyle: "italic", fontSize: 13, marginTop: 14 },
+  featureGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))", gap: 18, maxWidth: 1000, margin: "30px auto", padding: "0 24px" },
+  featureCard: { background: "linear-gradient(160deg,#1a141a,#0e0a0e)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "28px 22px", textAlign: "center" },
+  featureTitle: { fontFamily: "'Cinzel',serif", fontSize: 18, color: GOLD, margin: "12px 0 8px" },
+  featureText: { color: "#b8ac98", fontSize: 14.5, lineHeight: 1.65, margin: 0 },
+  pricing: { textAlign: "center", maxWidth: 620, margin: "50px auto", padding: "40px 28px", background: "linear-gradient(160deg,#1c1016,#0a0608)", border: `1px solid ${GOLD}44`, borderRadius: 14 },
+  pricingTitle: { fontFamily: "'Cinzel',serif", fontSize: 22, color: "#e8e0d4", margin: "0 0 12px" },
+  pricingText: { color: "#9a8f80", fontSize: 15, lineHeight: 1.7, margin: "0 0 24px" },
+  footer: { textAlign: "center", padding: "40px 20px 30px", color: "#5a5048", fontSize: 12, fontStyle: "italic", lineHeight: 1.8 },
+};
+
+// ============================================================
 // AUTH SCREEN
 // ============================================================
-function AuthScreen({ onAuth }) {
+function AuthScreen({ onAuth, onBack }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -109,6 +191,7 @@ function AuthScreen({ onAuth }) {
     <div style={authStyles.overlay}>
       <style>{css}</style>
       <div style={authStyles.card} className="fade-in">
+        {onBack && <button style={authStyles.backLink} onClick={onBack}>← back</button>}
         <div style={authStyles.logo}>⚔</div>
         <h1 style={authStyles.title}>DEBT SLAYER</h1>
         <p style={authStyles.sub}>Slay your debts. Reclaim your gold.</p>
@@ -169,8 +252,12 @@ export default function DebtSlayer() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const [showAuth, setShowAuth] = useState(false);
+
   if (authLoading) return <div style={{ background: "#050304", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: GOLD, fontFamily: "serif", fontSize: 22 }}>⚔ Loading the Realm...</div>;
-  if (!user) return <AuthScreen onAuth={setUser} />;
+  if (!user) return showAuth
+    ? <AuthScreen onAuth={setUser} onBack={() => setShowAuth(false)} />
+    : <LandingPage onEnter={() => setShowAuth(true)} />;
   return <GameApp user={user} />;
 }
 
@@ -184,6 +271,8 @@ function GameApp({ user }) {
   const [bosses, setBosses]           = useState([]);
   const [bossesLoading, setBossesLoading] = useState(true);
   const [showSummon, setShowSummon]   = useState(false);
+  const [editBoss, setEditBoss]       = useState(null);
+  const [battleLog, setBattleLog]     = useState([]);
   const [activeBoss, setActiveBoss]   = useState(null);
   const [payAmount, setPayAmount]     = useState("");
   const [hitFlash, setHitFlash]       = useState(false);
@@ -219,7 +308,7 @@ function GameApp({ user }) {
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chat, thinking]);
 
-  // --- Load this user's bosses from Supabase on login ---
+  // --- Load bosses from Supabase, applying real interest for time elapsed ---
   useEffect(() => {
     async function loadBosses() {
       const { data, error } = await supabase
@@ -227,11 +316,37 @@ function GameApp({ user }) {
         .select("*")
         .order("created_at", { ascending: true });
       if (!error && data) {
-        setBosses(data.map((b) => ({
-          id: b.id, type: b.type, name: b.name,
-          total: Number(b.total), remaining: Number(b.remaining),
-          apr: Number(b.apr), minPayment: Number(b.min_payment),
-        })));
+        const now = new Date();
+        let totalAccrued = 0;
+        const loaded = data.map((b) => {
+          let remaining = Number(b.remaining);
+          const apr = Number(b.apr);
+          const last = b.last_interest_at ? new Date(b.last_interest_at) : null;
+          if (apr > 0 && remaining > 0 && last) {
+            const days = Math.floor((now - last) / 86400000);
+            if (days >= 1) {
+              const interest = Math.round(remaining * (apr / 100 / 365) * days * 100) / 100;
+              if (interest > 0) {
+                remaining = Math.round((remaining + interest) * 100) / 100;
+                totalAccrued += interest;
+                supabase.from("bosses")
+                  .update({ remaining, last_interest_at: now.toISOString() })
+                  .eq("id", b.id)
+                  .then(({ error: e }) => { if (e) console.error(e.message); });
+              }
+            }
+          }
+          return {
+            id: b.id, type: b.type, name: b.name,
+            total: Number(b.total), remaining,
+            apr, minPayment: Number(b.min_payment),
+          };
+        });
+        setBosses(loaded);
+        if (totalAccrued >= 0.5) {
+          setToast({ sigil: "🩸", name: "The bosses have fed", desc: `Interest grew your debts by $${totalAccrued.toFixed(2)} while you were away` });
+          setTimeout(() => setToast(null), 5500);
+        }
       }
       setBossesLoading(false);
     }
@@ -327,6 +442,79 @@ function GameApp({ user }) {
     playSound("achievement");
   }
 
+  // --- Open a boss battle and load its battle log ---
+  async function openBoss(b) {
+    setActiveBoss(b);
+    setView("boss");
+    setBattleLog([]);
+    const { data } = await supabase.from("payments").select("*")
+      .eq("boss_id", b.id).order("created_at", { ascending: false }).limit(25);
+    if (data) setBattleLog(data);
+  }
+
+  // --- Edit a boss's details ---
+  async function updateBoss(updated) {
+    const { error } = await supabase.from("bosses").update({
+      name: updated.name, remaining: updated.remaining,
+      apr: updated.apr, min_payment: updated.minPayment,
+    }).eq("id", updated.id);
+    if (error) { alert("Update failed: " + error.message); return; }
+    setBosses((prev) => prev.map((b) => b.id === updated.id ? { ...b, ...updated } : b));
+    setActiveBoss((a) => a && a.id === updated.id ? { ...a, ...updated } : a);
+    setEditBoss(null);
+  }
+
+  // --- Banish (delete) a boss entirely ---
+  async function banishBoss(boss) {
+    if (!window.confirm(`Banish ${boss.name} from the realm? This erases the boss and its battle log forever.`)) return;
+    const { error } = await supabase.from("bosses").delete().eq("id", boss.id);
+    if (error) { alert("The banishment failed: " + error.message); return; }
+    setBosses((prev) => prev.filter((b) => b.id !== boss.id));
+    setActiveBoss(null);
+    setView("arena");
+  }
+
+  // --- Generate a shareable victory card image ---
+  function shareVictory(boss) {
+    const meta = BOSS_TYPES[boss.type];
+    const c = document.createElement("canvas");
+    c.width = 1080; c.height = 1080;
+    const ctx = c.getContext("2d");
+    const g = ctx.createRadialGradient(540, 420, 120, 540, 540, 820);
+    g.addColorStop(0, "#221420"); g.addColorStop(1, "#050304");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1080);
+    ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 8; ctx.strokeRect(36, 36, 1008, 1008);
+    ctx.strokeStyle = "#d4af3744"; ctx.lineWidth = 2; ctx.strokeRect(56, 56, 968, 968);
+    ctx.textAlign = "center";
+    ctx.font = "190px serif";
+    ctx.fillText(meta.sigil, 540, 360);
+    ctx.fillStyle = "#d4af37"; ctx.font = "bold 58px Georgia, serif";
+    ctx.fillText("⚜  BOSS SLAIN  ⚜", 540, 500);
+    ctx.fillStyle = "#e8e0d4"; ctx.font = "bold 70px Georgia, serif";
+    ctx.fillText(boss.name, 540, 610);
+    ctx.fillStyle = "#ff6b35"; ctx.font = "bold 88px Georgia, serif";
+    ctx.fillText("$" + boss.total.toLocaleString() + " DEFEATED", 540, 750);
+    ctx.fillStyle = "#9a8f80"; ctx.font = "italic 38px Georgia, serif";
+    ctx.fillText("Slay your debts. Reclaim your gold.", 540, 870);
+    ctx.fillStyle = "#d4af37"; ctx.font = "42px Georgia, serif";
+    ctx.fillText(window.location.host, 540, 950);
+    c.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "debt-slayer-victory.png", { type: "image/png" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Boss Slain!", text: `I just slew ${boss.name} — $${boss.total.toLocaleString()} of debt defeated! ⚔` });
+          return;
+        } catch (e) { /* user cancelled — fall through to download */ }
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "debt-slayer-victory.png";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, "image/png");
+  }
+
   // --- Persist damage to Supabase (fire and forget) ---
   function saveBossRemaining(bossId, newRemaining) {
     supabase.from("bosses").update({ remaining: newRemaining }).eq("id", bossId)
@@ -400,6 +588,9 @@ function GameApp({ user }) {
     const nowDead = boss.remaining > 0 && newRemaining <= 0;
     setBosses((prev) => prev.map((b) => b.id === boss.id ? { ...b, remaining: newRemaining } : b));
     saveBossRemaining(boss.id, newRemaining);
+    supabase.from("payments").insert({ user_id: user.id, boss_id: boss.id, amount: dmg, was_crit: !!isCrit })
+      .then(({ error }) => { if (error) console.error("Payment log failed:", error.message); });
+    setBattleLog((l) => [{ id: "local-" + Date.now(), amount: dmg, was_crit: !!isCrit, created_at: new Date().toISOString() }, ...l]);
     setXp((x) => x + Math.floor(dmg / 10) * (isCrit ? 2 : 1));
     setStats((s) => ({ ...s, totalStrikes: s.totalStrikes + 1, totalDamage: s.totalDamage + dmg, bossesSlain: s.bossesSlain + (nowDead ? 1 : 0), biggestSlain: nowDead ? Math.max(s.biggestSlain, boss.total) : s.biggestSlain }));
     setSeasonDamage((d) => d + dmg);
@@ -456,11 +647,11 @@ function GameApp({ user }) {
       <style>{css}</style>
 
       {/* HEADER */}
-      <header style={styles.header}>
+      <header className="ds-header" style={styles.header}>
         <div style={styles.brand}>
           <span style={styles.brandMark}>⚔</span>
           <div>
-            <h1 style={styles.brandTitle}>DEBT SLAYER</h1>
+            <h1 className="ds-brand-title" style={styles.brandTitle}>DEBT SLAYER</h1>
             <p style={styles.brandSub}>Slay your debts. Reclaim your gold.</p>
           </div>
         </div>
@@ -477,13 +668,13 @@ function GameApp({ user }) {
       </header>
 
       {/* NAV */}
-      <nav style={styles.nav}>
+      <nav className="ds-nav" style={styles.nav}>
         {[["arena","🗡 The Arena"],["planner","🗺 Battle Planner"],["advisor","🔮 War Council"],["seasons","🏆 Seasons"]].map(([k, label]) => (
           <button key={k} onClick={() => setView(k)} style={{ ...styles.navBtn, ...(view === k ? styles.navBtnActive : {}) }}>{label}</button>
         ))}
       </nav>
 
-      <main style={styles.main}>
+      <main className="ds-main" style={styles.main}>
 
         {/* ARENA */}
         {view === "arena" && (
@@ -507,7 +698,7 @@ function GameApp({ user }) {
               <>
                 <div style={styles.realmBanner}>
                   <p style={styles.realmLabel}>TOTAL CURSE UPON THE REALM</p>
-                  <p style={styles.realmTotal}>${totalDebt.toLocaleString()}</p>
+                  <p className="ds-realm-total" style={styles.realmTotal}>${totalDebt.toLocaleString()}</p>
                   <div style={styles.realmBarOuter}><div style={{ ...styles.realmBarInner, width: `${totalOriginal > 0 ? ((totalOriginal - totalDebt) / totalOriginal) * 100 : 0}%` }} /></div>
                   <p style={styles.realmFreed}>{totalOriginal > 0 ? Math.round(((totalOriginal - totalDebt) / totalOriginal) * 100) : 0}% of the realm freed</p>
                 </div>
@@ -526,11 +717,11 @@ function GameApp({ user }) {
                 <div style={styles.bossGrid}>
                   {bosses.map((b) => {
                     const meta = BOSS_TYPES[b.type];
-                    const hp = (b.remaining / b.total) * 100;
+                    const hp = Math.min(100, (b.remaining / b.total) * 100);
                     const dead = b.remaining <= 0;
                     return (
                       <div key={b.id} className="boss-card" style={{ ...styles.bossCard, borderColor: dead ? GOLD : meta.color, opacity: dead ? 0.65 : 1 }}
-                        onClick={() => { setActiveBoss(b); setView("boss"); }}>
+                        onClick={() => openBoss(b)}>
                         <div style={{ ...styles.bossSigil, background: `radial-gradient(circle, ${meta.color}55, transparent)` }}>
                           <span style={{ fontSize: 40, filter: dead ? "grayscale(1)" : "none" }}>{meta.sigil}</span>
                         </div>
@@ -551,16 +742,22 @@ function GameApp({ user }) {
         {/* BOSS BATTLE */}
         {view === "boss" && activeBoss && (() => {
           const meta = BOSS_TYPES[activeBoss.type];
-          const hp = (activeBoss.remaining / activeBoss.total) * 100;
+          const hp = Math.min(100, (activeBoss.remaining / activeBoss.total) * 100);
           const dead = activeBoss.remaining <= 0;
           return (
             <div className="fade-in">
-              <button style={styles.backBtn} onClick={() => setView("arena")}>← Retreat to Arena</button>
+              <div style={styles.battleToolbar}>
+                <button style={styles.backBtn} onClick={() => setView("arena")}>← Retreat to Arena</button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button style={styles.toolBtn} onClick={() => setEditBoss(activeBoss)}>⚙ Edit</button>
+                  <button style={{ ...styles.toolBtn, color: "#c87a5a", borderColor: "#5a3028" }} onClick={() => banishBoss(activeBoss)}>☠ Banish</button>
+                </div>
+              </div>
               <div className={shakeStage ? "stage-shake" : ""} style={{ ...styles.battleStage, boxShadow: hitFlash ? `inset 0 0 140px ${BLOOD}` : "inset 0 0 80px #000" }}>
                 {combo >= 2 && !dead && <div style={styles.comboMeter}><span style={styles.comboNum}>{combo}×</span><span style={styles.comboLabel}>COMBO</span></div>}
                 {critText && <div className="crit-pop" style={styles.critText}>{critText}</div>}
                 <div className={hitFlash ? "shake" : ""} style={styles.battleSigil}>
-                  <span style={{ fontSize: 110, filter: dead ? "grayscale(1) blur(1px)" : "none", display: "inline-block" }}>{meta.sigil}</span>
+                  <span className="ds-battle-emoji" style={{ fontSize: 110, filter: dead ? "grayscale(1) blur(1px)" : "none", display: "inline-block" }}>{meta.sigil}</span>
                   {embers.map((e) => <span key={e.id} className="ember" style={{ left: `${e.x}%`, "--angle": `${e.angle}deg`, "--dist": `${e.dist}px` }}>✦</span>)}
                   {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.crit ? GOLD : EMBER }}>-${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
                 </div>
@@ -587,6 +784,20 @@ function GameApp({ user }) {
                   </div>
                 )}
               </div>
+              {battleLog.length > 0 && (
+                <div style={styles.logBox}>
+                  <div style={styles.logHeader}>
+                    <span style={styles.logTitle}>📜 Battle Log</span>
+                    <span style={styles.logTotal}>Total dealt: ${battleLog.reduce((s, p) => s + Number(p.amount), 0).toLocaleString()}</span>
+                  </div>
+                  {battleLog.slice(0, 10).map((p) => (
+                    <div key={p.id} style={styles.logRow}>
+                      <span>{p.was_crit ? "💥 Critical strike" : "🗡 Strike"} · <b style={{ color: EMBER }}>${Number(p.amount).toLocaleString()}</b></span>
+                      <span style={styles.logDate}>{new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}
@@ -744,6 +955,9 @@ function GameApp({ user }) {
       {/* SUMMON BOSS MODAL */}
       {showSummon && <SummonModal onSummon={summonBoss} onClose={() => setShowSummon(false)} />}
 
+      {/* EDIT BOSS MODAL */}
+      {editBoss && <EditBossModal boss={editBoss} onSave={updateBoss} onClose={() => setEditBoss(null)} />}
+
       {/* VICTORY OVERLAY */}
       {victoryBoss && (() => {
         const meta = BOSS_TYPES[victoryBoss.type];
@@ -756,7 +970,10 @@ function GameApp({ user }) {
               <h2 style={styles.victoryBossName}>{victoryBoss.name}</h2>
               <p style={styles.victoryFlavor}>The {meta.title} falls. The realm grows brighter.</p>
               <div style={styles.victoryRewards}><span>+{Math.floor(victoryBoss.total / 10)} XP</span><span>·</span><span>+1 Boss Slain</span></div>
-              <button style={styles.victoryBtn} onClick={() => { setVictoryBoss(null); setView("arena"); }}>Claim Victory</button>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <button style={styles.shareBtn} onClick={(e) => { e.stopPropagation(); shareVictory(victoryBoss); }}>📜 Share Victory</button>
+                <button style={styles.victoryBtn} onClick={() => { setVictoryBoss(null); setView("arena"); }}>Claim Victory</button>
+              </div>
             </div>
           </div>
         );
@@ -894,6 +1111,69 @@ function PlanStat({ label, value, big, gold }) {
 }
 
 // ============================================================
+// EDIT BOSS MODAL — fix typos, update balances, refinance
+// ============================================================
+function EditBossModal({ boss, onSave, onClose }) {
+  const [name, setName]             = useState(boss.name);
+  const [remaining, setRemaining]   = useState(String(boss.remaining));
+  const [apr, setApr]               = useState(String(boss.apr));
+  const [minPayment, setMinPayment] = useState(String(boss.minPayment));
+  const [saving, setSaving]         = useState(false);
+  const meta = BOSS_TYPES[boss.type];
+
+  async function handleSave() {
+    const r = parseFloat(remaining);
+    if (!name.trim() || isNaN(r) || r < 0) return;
+    setSaving(true);
+    await onSave({
+      ...boss,
+      name: name.trim(),
+      remaining: r,
+      apr: parseFloat(apr) || 0,
+      minPayment: parseFloat(minPayment) || 0,
+    });
+    setSaving(false);
+  }
+
+  return (
+    <div style={styles.summonOverlay} onClick={onClose}>
+      <div className="victory-burst" style={styles.summonCard} onClick={(e) => e.stopPropagation()}>
+        <button style={styles.summonClose} onClick={onClose}>✕</button>
+        <div style={{ textAlign: "center", marginBottom: 8 }}>
+          <span style={{ fontSize: 56, filter: `drop-shadow(0 0 20px ${meta.color})` }}>{meta.sigil}</span>
+        </div>
+        <h2 style={{ ...styles.summonTitle, marginTop: 0 }}>Edit Boss</h2>
+        <p style={styles.summonSub}>Balances change. Update the beast to match reality.</p>
+
+        <label style={styles.summonLabel}>BOSS NAME</label>
+        <input style={styles.summonInput} value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
+
+        <label style={styles.summonLabel}>CURRENT BALANCE (its HP)</label>
+        <div style={styles.moneyRow}>
+          <span style={styles.dollarSign}>$</span>
+          <input style={{ ...styles.summonInput, marginBottom: 0, border: "none", background: "transparent" }} type="number" value={remaining} onChange={(e) => setRemaining(e.target.value)} />
+        </div>
+
+        <div style={styles.summonTwoCol}>
+          <div style={{ flex: 1 }}>
+            <label style={styles.summonLabel}>APR %</label>
+            <input style={styles.summonInput} type="number" value={apr} onChange={(e) => setApr(e.target.value)} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={styles.summonLabel}>MIN PAYMENT</label>
+            <input style={styles.summonInput} type="number" value={minPayment} onChange={(e) => setMinPayment(e.target.value)} />
+          </div>
+        </div>
+
+        <button style={{ ...styles.summonBtn, width: "100%", marginTop: 20 }} onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "⚔ UPDATE THE BEAST"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // CSS
 // ============================================================
 const css = `
@@ -924,6 +1204,15 @@ input:focus { outline: 1px solid #d4af37; }
 @keyframes floatBob { 0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);} }
 .toast-in { animation: toastIn .4s cubic-bezier(.2,1.3,.4,1) both; }
 @keyframes toastIn { from{opacity:0;transform:translateX(120%);}to{opacity:1;transform:none;} }
+@media (max-width: 640px) {
+  .ds-header { padding: 14px 16px !important; }
+  .ds-main { padding: 16px !important; }
+  .ds-nav { padding: 10px 16px !important; gap: 6px !important; }
+  .ds-nav button { padding: 7px 12px !important; font-size: 12px !important; }
+  .ds-brand-title { font-size: 20px !important; letter-spacing: 2px !important; }
+  .ds-realm-total { font-size: 32px !important; }
+  .ds-battle-emoji { font-size: 76px !important; }
+}
 `;
 
 // ============================================================
@@ -1106,11 +1395,21 @@ const styles = {
   rerollBtn: { background:"#0a0608", border:`1px solid ${GOLD}55`, borderRadius:6, fontSize:20, padding:"10px 14px", cursor:"pointer" },
   moneyRow: { display:"flex", alignItems:"center", gap:4, background:"#0a0608", border:`1px solid ${GOLD}55`, borderRadius:6, padding:"2px 12px" },
   summonTwoCol: { display:"flex", gap:14 },
+  // battle toolbar + log
+  battleToolbar: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:10 },
+  toolBtn: { fontFamily:"'Cinzel',serif", background:"transparent", color:"#9a8f80", border:"1px solid #3a3038", padding:"7px 14px", borderRadius:4, cursor:"pointer", fontSize:12, letterSpacing:1 },
+  logBox: { marginTop:20, background:"linear-gradient(160deg,#140e12,#0a0608)", border:"1px solid #2a2228", borderRadius:10, padding:"16px 20px" },
+  logHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12, flexWrap:"wrap", gap:8 },
+  logTitle: { fontFamily:"'Cinzel',serif", fontSize:16, color:"#e8e0d4", letterSpacing:1 },
+  logTotal: { fontFamily:"'Cinzel',serif", fontSize:13, color:GOLD },
+  logRow: { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid #1a141a", fontSize:14, color:"#c8bca8", gap:10, flexWrap:"wrap" },
+  logDate: { fontSize:12, color:"#7a7060" },
+  shareBtn: { fontFamily:"'Cinzel',serif", background:"transparent", color:GOLD, border:`2px solid ${GOLD}`, padding:"12px 24px", borderRadius:6, fontWeight:700, fontSize:14, cursor:"pointer", letterSpacing:1 },
 };
 
 const authStyles = {
   overlay: { minHeight:"100vh", background:"radial-gradient(ellipse at top,#1a1218 0%,#050304 100%)", display:"flex", alignItems:"center", justifyContent:"center", padding:20 },
-  card: { width:"100%", maxWidth:400, background:"linear-gradient(160deg,#1c1016,#0a0608)", border:`1px solid ${GOLD}44`, borderRadius:14, padding:"40px 32px", textAlign:"center" },
+  card: { position:"relative", width:"100%", maxWidth:400, background:"linear-gradient(160deg,#1c1016,#0a0608)", border:`1px solid ${GOLD}44`, borderRadius:14, padding:"40px 32px", textAlign:"center" },
   logo: { fontSize:48, color:GOLD, textShadow:`0 0 24px ${EMBER}` },
   title: { fontFamily:"'Cinzel',serif", fontWeight:900, fontSize:28, color:GOLD, letterSpacing:3, margin:"8px 0 4px" },
   sub: { color:"#9a8f80", fontStyle:"italic", fontSize:14, margin:"0 0 28px" },
@@ -1119,6 +1418,7 @@ const authStyles = {
   input: { width:"100%", display:"block", background:"#0a0608", border:"1px solid #3a3038", color:"#e8e0d4", padding:"12px 14px", borderRadius:6, fontSize:15, marginBottom:12, fontFamily:"'EB Garamond',serif" },
   submitBtn: { width:"100%", fontFamily:"'Cinzel',serif", background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", border:"none", padding:"14px", borderRadius:6, fontWeight:700, fontSize:15, cursor:"pointer", letterSpacing:1, marginTop:4 },
   switchBtn: { background:"none", border:"none", color:GOLD, cursor:"pointer", fontSize:13, marginTop:16, textDecoration:"underline", fontFamily:"'EB Garamond',serif" },
+  backLink: { position:"absolute", top:14, left:16, background:"none", border:"none", color:"#7a7060", fontSize:13, cursor:"pointer", fontStyle:"italic" },
   error: { color:"#ff6b35", fontSize:13, margin:"4px 0 8px" },
   success: { color:GOLD, fontSize:13, margin:"4px 0 8px" },
 };
