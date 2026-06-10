@@ -1062,10 +1062,17 @@ function GameApp({ user, onShowPolicy }) {
               <div className={shakeStage ? "stage-shake" : ""} style={{ ...styles.battleStage, boxShadow: hitFlash ? `inset 0 0 140px ${BLOOD}` : "inset 0 0 80px #000" }}>
                 {combo >= 2 && !dead && <div style={styles.comboMeter}><span style={styles.comboNum}>{combo}×</span><span style={styles.comboLabel}>COMBO</span></div>}
                 {critText && <div className="crit-pop" style={styles.critText}>{critText}</div>}
-                <div className={hitFlash ? "shake" : ""} style={styles.battleSigil}>
-                  <BossArt type={activeBoss.type} skin={activeBoss.skin} size={170} dead={dead} className={dead ? "ds-battle-art" : "ds-battle-art boss-idle"} />
-                  {embers.map((e) => <span key={e.id} className="ember" style={{ left: `${e.x}%`, "--angle": `${e.angle}deg`, "--dist": `${e.dist}px` }}>✦</span>)}
-                  {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.crit ? GOLD : EMBER }}>-${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
+                <div style={styles.duelRow}>
+                  <div className="ds-duel-slayer" style={styles.duelSlayer}>
+                    <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={135} className="boss-idle" />
+                    <span style={styles.duelName}>YOU</span>
+                  </div>
+                  <span className="ds-duel-vs" style={styles.duelVs}>⚔</span>
+                  <div className={hitFlash ? "shake" : ""} style={styles.battleSigil}>
+                    <BossArt type={activeBoss.type} skin={activeBoss.skin} size={250} dead={dead} className={dead ? "ds-battle-art" : "ds-battle-art boss-idle"} />
+                    {embers.map((e) => <span key={e.id} className="ember" style={{ left: `${e.x}%`, "--angle": `${e.angle}deg`, "--dist": `${e.dist}px` }}>✦</span>)}
+                    {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.crit ? GOLD : EMBER }}>-${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
+                  </div>
                 </div>
                 <h2 style={styles.battleName}>{activeBoss.name}</h2>
                 <p style={styles.battleTitle}>{meta.title}</p>
@@ -1719,7 +1726,9 @@ input:focus { outline: 1px solid #d4af37; }
   .ds-brand-title { font-size: 20px !important; letter-spacing: 2px !important; }
   .ds-realm-total { font-size: 32px !important; }
   .ds-battle-emoji { font-size: 76px !important; }
-  .ds-battle-art { width: 120px !important; height: 120px !important; }
+  .ds-battle-art { width: 170px !important; height: 170px !important; }
+  .ds-duel-slayer svg { width: 88px !important; height: 88px !important; }
+  .ds-duel-vs { font-size: 18px !important; padding-bottom: 30px !important; }
   .ds-attack-row { flex-wrap: wrap !important; padding: 10px 14px !important; }
   .ds-attack-row input { min-width: 0 !important; }
   .ds-strike-btn { width: 100% !important; padding: 16px !important; font-size: 16px !important; margin-top: 4px !important; }
@@ -1939,6 +1948,10 @@ const styles = {
   skinRow: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 },
   skinSwatch: { flex:"1 1 72px", minWidth:72, border:"2px solid", borderRadius:8, padding:"10px 6px 8px", cursor:"pointer", display:"flex", flexDirection:"column", gap:6 },
   skinLabel: { fontSize:10, color:"#e8e0d4", letterSpacing:1, fontFamily:"'Cinzel',serif", textAlign:"center", display:"block" },
+  duelRow: { display:"flex", alignItems:"flex-end", justifyContent:"center", gap:10, marginBottom:6, flexWrap:"nowrap" },
+  duelSlayer: { display:"flex", flexDirection:"column", alignItems:"center", gap:4 },
+  duelName: { fontFamily:"'Cinzel',serif", fontSize:11, letterSpacing:3, color:"#9a8f80" },
+  duelVs: { fontFamily:"'Cinzel',serif", fontSize:26, color:GOLD, paddingBottom:46, textShadow:`0 0 14px ${EMBER}` },
   accountTagBattle: { fontSize:13, color:"#8a9ab0", background:"#10141c", border:"1px solid #2a3242", borderRadius:4, padding:"4px 12px", display:"inline-block", margin:"4px 0 0", fontFamily:"'EB Garamond',serif" },
 };
 
