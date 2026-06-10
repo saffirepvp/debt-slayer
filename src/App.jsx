@@ -407,6 +407,9 @@ function GameApp({ user, onShowPolicy }) {
   const [unlocked, setUnlocked]       = useState([]);
   const [seasonDamage, setSeasonDamage] = useState(0);
   const [counselsUsed, setCounselsUsed] = useState(0);
+  const [plan, setPlan]                 = useState("annual"); // paywall toggle
+  const [remindersOn, setRemindersOn]   = useState(false);
+  const [reminderDay, setReminderDay]   = useState(1);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const goalCounted = useRef(false);
   const [toast, setToast]             = useState(null);
@@ -473,6 +476,8 @@ function GameApp({ user, onShowPolicy }) {
         p = created;
       }
       const { data: ach } = await supabase.from("achievements").select("achievement_id");
+      const { data: subRow } = await supabase.from("push_subscriptions").select("user_id").maybeSingle();
+      setRemindersOn(!!subRow);
       if (p) {
         let sd = Number(p.season_damage) || 0;
         let streak = p.streak || 0;
@@ -494,6 +499,7 @@ function GameApp({ user, onShowPolicy }) {
         setSeasonDamage(sd);
         setCounselsUsed(p.counsels_used || 0);
         setIsPremium(!!p.is_premium);
+        setReminderDay(p.reminder_day || 1);
       }
       if (ach) setUnlocked(ach.map((a) => a.achievement_id));
       setProfileLoaded(true);
@@ -518,11 +524,12 @@ function GameApp({ user, onShowPolicy }) {
         biggest_slain: stats.biggestSlain,
         counsels_used: counselsUsed,
         is_premium: isPremium,
+        reminder_day: reminderDay,
         updated_at: new Date().toISOString(),
       }).then(({ error }) => { if (error) console.error("Profile save failed:", error.message); });
     }, 800);
     return () => clearTimeout(t);
-  }, [xp, stats, seasonDamage, counselsUsed, isPremium, profileLoaded]);
+  }, [xp, stats, seasonDamage, counselsUsed, isPremium, reminderDay, profileLoaded]);
 
   // --- Award the season badge the moment the goal is crossed ---
   useEffect(() => {
@@ -621,6 +628,88 @@ function GameApp({ user, onShowPolicy }) {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "debt-slayer-victory.png";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, "image/png");
+  }
+
+  // --- Push notification reminders ---
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = window.atob(base64);
+    return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+  }
+
+  async function enableReminders() {
+    try {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        alert("Notifications aren't supported here yet. On iPhone: tap Share → Add to Home Screen first, then enable reminders from the installed app.");
+        return;
+      }
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") { alert("Notifications were blocked. You can enable them in your browser settings."); return; }
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY),
+      });
+      const { error } = await supabase.from("push_subscriptions")
+        .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: "user_id" });
+      if (error) throw error;
+      setRemindersOn(true);
+    } catch (e) { alert("Could not enable reminders: " + e.message); }
+  }
+
+  async function disableReminders() {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+    } catch (e) {}
+    await supabase.from("push_subscriptions").delete().eq("user_id", user.id);
+    setRemindersOn(false);
+  }
+
+  // --- Shareable Battle Plan card ---
+  function sharePlanCard({ freeDate, months, interest, saved, strat }) {
+    const c = document.createElement("canvas");
+    c.width = 1080; c.height = 1080;
+    const ctx = c.getContext("2d");
+    const g = ctx.createRadialGradient(540, 420, 120, 540, 540, 820);
+    g.addColorStop(0, "#221420"); g.addColorStop(1, "#050304");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1080);
+    ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 8; ctx.strokeRect(36, 36, 1008, 1008);
+    ctx.textAlign = "center";
+    ctx.font = "150px serif"; ctx.fillText("🗺", 540, 280);
+    ctx.fillStyle = "#9a8f80"; ctx.font = "40px Georgia, serif";
+    ctx.fillText("MY BATTLE PLAN · " + (strat === "avalanche" ? "🏔 AVALANCHE" : "❄ SNOWBALL"), 540, 380);
+    ctx.fillStyle = "#d4af37"; ctx.font = "bold 56px Georgia, serif";
+    ctx.fillText("MY REALM WILL BE FREE", 540, 490);
+    ctx.fillStyle = "#ff6b35"; ctx.font = "bold 96px Georgia, serif";
+    ctx.fillText(freeDate, 540, 610);
+    ctx.fillStyle = "#e8e0d4"; ctx.font = "44px Georgia, serif";
+    ctx.fillText(`${Math.floor(months / 12)}y ${months % 12}m of battle ahead`, 540, 700);
+    if (saved > 0) {
+      ctx.fillStyle = "#d4af37"; ctx.font = "bold 48px Georgia, serif";
+      ctx.fillText(`$${saved.toLocaleString()} in interest saved`, 540, 790);
+    }
+    ctx.fillStyle = "#9a8f80"; ctx.font = "italic 36px Georgia, serif";
+    ctx.fillText("Slay your debts. Reclaim your gold.", 540, 890);
+    ctx.fillStyle = "#d4af37"; ctx.font = "40px Georgia, serif";
+    ctx.fillText(window.location.host, 540, 960);
+    c.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "my-battle-plan.png", { type: "image/png" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "My Battle Plan", text: `My realm will be debt-free by ${freeDate} ⚔ Plotting the slaying at ${window.location.host}` });
+          return;
+        } catch (e) {}
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "my-battle-plan.png";
       a.click();
       URL.revokeObjectURL(a.href);
     }, "image/png");
@@ -991,6 +1080,11 @@ function GameApp({ user, onShowPolicy }) {
                 <PlanStat label="Total interest paid" value={`$${chosen.totalInterest.toLocaleString()}`} />
                 {interestSaved > 0 && <PlanStat label={`Saved vs ${strategy === "avalanche" ? "Snowball" : "Avalanche"}`} value={`$${interestSaved.toLocaleString()}`} gold />}
               </div>
+              <div style={{ textAlign: "center", margin: "0 0 26px" }}>
+                <button style={styles.shareBtn} onClick={() => sharePlanCard({ freeDate: fmtDate(chosen.freeDate), months: chosen.months, interest: chosen.totalInterest, saved: interestSaved, strat: strategy })}>
+                  📜 Share My Battle Plan
+                </button>
+              </div>
               <h3 style={styles.orderTitle}>⚔ Order of Slaying</h3>
               <div style={styles.orderList}>
                 {chosen.order.map((o, i) => {
@@ -1075,6 +1169,36 @@ function GameApp({ user, onShowPolicy }) {
             </div>
 
             <div style={styles.setCard}>
+              <p style={styles.setLabel}>⚔ STRIKE REMINDERS</p>
+              {remindersOn ? (
+                <>
+                  <p style={styles.setText}>Reminders are on. Each month on day {reminderDay}, we'll send a push notification reminding you to strike before your bosses regenerate.</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+                    <span style={{ color: "#9a8f80", fontSize: 14 }}>Remind me on day</span>
+                    <select value={reminderDay} onChange={(e) => setReminderDay(Number(e.target.value))} style={styles.setSelect}>
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <span style={{ color: "#9a8f80", fontSize: 14 }}>of each month</span>
+                  </div>
+                  <button style={styles.setDangerBtn} onClick={disableReminders}>Turn Off Reminders</button>
+                </>
+              ) : (
+                <>
+                  <p style={styles.setText}>Get one push notification a month on your chosen day — a nudge to log your payment before the bosses regenerate interest. No spam, just the strike call.</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+                    <span style={{ color: "#9a8f80", fontSize: 14 }}>Remind me on day</span>
+                    <select value={reminderDay} onChange={(e) => setReminderDay(Number(e.target.value))} style={styles.setSelect}>
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <span style={{ color: "#9a8f80", fontSize: 14 }}>of each month</span>
+                  </div>
+                  <button style={styles.crownBtn} onClick={enableReminders}>🔔 Enable Strike Reminders</button>
+                  <p style={styles.setHint}>On iPhone: add Debt Slayer to your Home Screen first (Share → Add to Home Screen), then enable from the installed app.</p>
+                </>
+              )}
+            </div>
+
+            <div style={styles.setCard}>
               <p style={styles.setLabel}>LEGAL</p>
               <div style={styles.setLinks}>
                 <button style={styles.inlineLink} onClick={() => onShowPolicy("terms")}>Terms of Service</button>
@@ -1098,7 +1222,18 @@ function GameApp({ user, onShowPolicy }) {
             <div style={styles.paywallCrown}>👑</div>
             <h2 style={styles.paywallTitle}>JOIN THE SLAYER'S GUILD</h2>
             <p style={styles.paywallSub}>Unlock the full arsenal for your campaign against debt.</p>
-            <div style={styles.priceTag}><span style={styles.price}>$4.99</span><span style={styles.priceUnit}>/month</span></div>
+            <div style={styles.planToggle}>
+              <button onClick={() => setPlan("monthly")} style={{ ...styles.planBtn, ...(plan === "monthly" ? styles.planBtnActive : {}) }}>
+                Monthly
+                <span style={styles.planPrice}>$4.99<span style={styles.planUnit}>/mo</span></span>
+              </button>
+              <button onClick={() => setPlan("annual")} style={{ ...styles.planBtn, ...(plan === "annual" ? styles.planBtnActive : {}) }}>
+                <span style={styles.planSaveTag}>SAVE 50%</span>
+                Annual
+                <span style={styles.planPrice}>$29.99<span style={styles.planUnit}>/yr</span></span>
+                <span style={styles.planEquiv}>≈ $2.50/mo</span>
+              </button>
+            </div>
             <div style={styles.featureList}>
               {["🗺 The Battle Planner — exact payoff order, debt-free date & interest saved","🔮 Unlimited AI War Council across all 3 advisors","⚔ Unlimited bosses (free tier tracks 2)","🏆 Permanent season badges, streak ranks & achievements"].map((f) => <div key={f} style={styles.featureItem}>{f}</div>)}
             </div>
@@ -1579,6 +1714,14 @@ const styles = {
   setHint: { color:"#7a7060", fontSize:13, fontStyle:"italic", margin:"10px 0 0" },
   setDangerBtn: { fontFamily:"'Cinzel',serif", background:"transparent", color:"#c87a5a", border:"1px solid #5a3028", padding:"12px 20px", borderRadius:6, cursor:"pointer", fontSize:14, letterSpacing:1 },
   setLinks: { display:"flex", flexDirection:"column", gap:12, alignItems:"flex-start" },
+  setSelect: { background:"#0a0608", color:"#e8e0d4", border:"1px solid #3a3038", borderRadius:6, padding:"8px 12px", fontSize:15, fontFamily:"'Cinzel',serif" },
+  planToggle: { display:"flex", gap:12, margin:"22px 0", justifyContent:"center", flexWrap:"wrap" },
+  planBtn: { position:"relative", display:"flex", flexDirection:"column", gap:2, alignItems:"center", fontFamily:"'Cinzel',serif", background:"linear-gradient(160deg,#1a141a,#0e0a0e)", color:"#c8bca8", border:"2px solid #3a3038", padding:"16px 26px", borderRadius:10, cursor:"pointer", fontSize:14, letterSpacing:1, minWidth:150 },
+  planBtnActive: { borderColor:GOLD, color:GOLD, background:`${GOLD}11` },
+  planPrice: { fontSize:26, fontWeight:900, color:"#e8e0d4", marginTop:4 },
+  planUnit: { fontSize:13, color:"#9a8f80", fontWeight:400 },
+  planEquiv: { fontSize:11, color:GOLD, fontStyle:"italic", fontFamily:"'EB Garamond',serif" },
+  planSaveTag: { position:"absolute", top:-10, right:-8, background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", fontSize:10, padding:"3px 8px", borderRadius:4, letterSpacing:1 },
 };
 
 const authStyles = {

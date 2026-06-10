@@ -2,12 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>debt-slayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Debt Slayer — Turn Your Debts Into Bosses and Slay Them</title>
+    <meta name="description" content="A dark fantasy debt payoff tracker. Turn every credit card, loan, and car note into an RPG boss — every real payment is a strike. Free to start." />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0a0608" />
+    <link rel="icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Debt Slayer" />
+
+    <!-- Social sharing (Open Graph) — update URLs when you get your custom domain -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debt Slayer — Your debt is a monster. Slay it." />
+    <meta property="og:description" content="Turn every debt into an RPG boss. Every payment is a strike. Free to start." />
+    <meta property="og:url" content="https://debt-slayer-omega.vercel.app" />
+    <meta property="og:image" content="https://debt-slayer-omega.vercel.app/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Debt Slayer — Your debt is a monster. Slay it." />
+    <meta name="twitter:description" content="Turn every debt into an RPG boss. Every payment is a strike. Free to start." />
+    <meta name="twitter:image" content="https://debt-slayer-omega.vercel.app/og-image.png" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
