@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
-import BossArt, { PALETTES, FREE_SKINS } from "./BossArt";
+import BossArt, { PALETTES, FREE_SKINS, SlayerAvatar } from "./BossArt";
 
 // ============================================================
 // DEBT SLAYER — Dark Fantasy Debt-Tracking RPG
@@ -61,6 +61,7 @@ function currentSeason() { return SEASONS[new Date().getMonth() % SEASONS.length
 const SEASON_KEY = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
 const FREE_BOSS_LIMIT = 2;
 const FREE_COUNSEL_LIMIT = 5;
+const SKIN_COSTS = { blood: 0, ash: 50, spectral: 100, gilded: 250, void: 400 }; // avatar skin shop (coins)
 const STREAK_RANKS = ["Squire", "Knight", "Champion", "Warlord", "Legend"];
 function daysLeftInMonth() {
   const now = new Date();
@@ -411,6 +412,12 @@ function GameApp({ user, onShowPolicy }) {
   const [counselsUsed, setCounselsUsed] = useState(0);
   const [plan, setPlan]                 = useState("annual"); // paywall toggle
   const [remindersOn, setRemindersOn]   = useState(false);
+  const [coins, setCoins]               = useState(0);
+  const [avatarGender, setAvatarGender] = useState("male");
+  const [avatarSkin, setAvatarSkin]     = useState("blood");
+  const [ownedSkins, setOwnedSkins]     = useState(["blood"]);
+  const [ambienceOn, setAmbienceOn]     = useState(false);
+  const ambienceRef = useRef(null);
   const [reminderDay, setReminderDay]   = useState(1);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const goalCounted = useRef(false);
@@ -504,6 +511,10 @@ function GameApp({ user, onShowPolicy }) {
         setCounselsUsed(p.counsels_used || 0);
         setIsPremium(!!p.is_premium);
         setReminderDay(p.reminder_day || 1);
+        setCoins(p.coins || 0);
+        setAvatarGender(p.avatar_gender || "male");
+        setAvatarSkin(p.avatar_skin || "blood");
+        setOwnedSkins(Array.isArray(p.owned_avatar_skins) ? p.owned_avatar_skins : ["blood"]);
       }
       if (ach) setUnlocked(ach.map((a) => a.achievement_id));
       setProfileLoaded(true);
@@ -529,11 +540,15 @@ function GameApp({ user, onShowPolicy }) {
         counsels_used: counselsUsed,
         is_premium: isPremium,
         reminder_day: reminderDay,
+        coins,
+        avatar_gender: avatarGender,
+        avatar_skin: avatarSkin,
+        owned_avatar_skins: ownedSkins,
         updated_at: new Date().toISOString(),
       }).then(({ error }) => { if (error) console.error("Profile save failed:", error.message); });
     }, 800);
     return () => clearTimeout(t);
-  }, [xp, stats, seasonDamage, counselsUsed, isPremium, reminderDay, profileLoaded]);
+  }, [xp, stats, seasonDamage, counselsUsed, isPremium, reminderDay, coins, avatarGender, avatarSkin, ownedSkins, profileLoaded]);
 
   // --- Award the season badge the moment the goal is crossed ---
   useEffect(() => {
@@ -651,6 +666,73 @@ function GameApp({ user, onShowPolicy }) {
       a.click();
       URL.revokeObjectURL(a.href);
     }, "image/png");
+  }
+
+  // --- Dungeon ambience: generated wind + low drone, no audio files ---
+  function startAmbience() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ac = new Ctx();
+      // wind: looping brown noise through a lowpass
+      const len = ac.sampleRate * 4;
+      const buf = ac.createBuffer(1, len, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;
+        d[i] = last * 3.5;
+      }
+      const noise = ac.createBufferSource();
+      noise.buffer = buf; noise.loop = true;
+      const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 320; lp.Q.value = 0.6;
+      const windGain = ac.createGain(); windGain.gain.value = 0.05;
+      // slow LFO so the wind swells and dies
+      const lfo = ac.createOscillator(); lfo.frequency.value = 0.07;
+      const lfoGain = ac.createGain(); lfoGain.gain.value = 0.028;
+      lfo.connect(lfoGain); lfoGain.connect(windGain.gain);
+      // low dungeon drone
+      const drone = ac.createOscillator(); drone.type = "sine"; drone.frequency.value = 55;
+      const drone2 = ac.createOscillator(); drone2.type = "sine"; drone2.frequency.value = 82.5;
+      const droneGain = ac.createGain(); droneGain.gain.value = 0.022;
+      noise.connect(lp); lp.connect(windGain); windGain.connect(ac.destination);
+      drone.connect(droneGain); drone2.connect(droneGain); droneGain.connect(ac.destination);
+      noise.start(); drone.start(); drone2.start(); lfo.start();
+      ambienceRef.current = ac;
+    } catch (e) {}
+  }
+  function stopAmbience() {
+    try { ambienceRef.current?.close(); } catch (e) {}
+    ambienceRef.current = null;
+  }
+  function toggleAmbience() {
+    if (ambienceOn) { stopAmbience(); setAmbienceOn(false); localStorage.setItem("ds-ambience", "off"); }
+    else { startAmbience(); setAmbienceOn(true); localStorage.setItem("ds-ambience", "on"); }
+  }
+  // resume ambience on next tap if it was on last session (browsers require a gesture)
+  useEffect(() => {
+    if (localStorage.getItem("ds-ambience") === "on") {
+      const once = () => { startAmbience(); setAmbienceOn(true); window.removeEventListener("pointerdown", once); };
+      window.addEventListener("pointerdown", once);
+      return () => window.removeEventListener("pointerdown", once);
+    }
+  }, []);
+  useEffect(() => () => stopAmbience(), []);
+
+  // --- Avatar skin shop ---
+  function buyOrEquipSkin(key) {
+    const pal = PALETTES[key];
+    if (ownedSkins.includes(key)) { setAvatarSkin(key); playSound("achievement"); return; }
+    if (!pal.free && !isPremium) { setView("paywall"); return; }
+    const cost = SKIN_COSTS[key] ?? 0;
+    if (coins < cost) { notify(`You need ${cost - coins} more coins. Strike your debts to earn them!`); return; }
+    setCoins((c) => c - cost);
+    setOwnedSkins((o) => [...o, key]);
+    setAvatarSkin(key);
+    playSound("victory");
+    setToast({ sigil: "🛡", name: `${pal.label} Slayer unlocked!`, desc: `Spent ${cost} coins` });
+    setTimeout(() => setToast(null), 4000);
   }
 
   // --- Push notification reminders ---
@@ -812,6 +894,7 @@ function GameApp({ user, onShowPolicy }) {
       .then(({ error }) => { if (error) console.error("Payment log failed:", error.message); });
     setBattleLog((l) => [{ id: "local-" + Date.now(), amount: dmg, was_crit: !!isCrit, created_at: new Date().toISOString() }, ...l]);
     setXp((x) => x + Math.floor(dmg / 10) * (isCrit ? 2 : 1));
+    setCoins((c) => c + Math.max(1, Math.floor(dmg / 10)) * (isCrit ? 2 : 1));
     setStats((s) => ({ ...s, totalStrikes: s.totalStrikes + 1, totalDamage: s.totalDamage + dmg, bossesSlain: s.bossesSlain + (nowDead ? 1 : 0), biggestSlain: nowDead ? Math.max(s.biggestSlain, boss.total) : s.biggestSlain }));
     setSeasonDamage((d) => d + dmg);
     setHitFlash(true); setShakeStage(true);
@@ -876,7 +959,9 @@ function GameApp({ user, onShowPolicy }) {
           </div>
         </div>
         <div style={styles.statbar}>
+          <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={42} />
           <Stat label="LVL" value={level} />
+          <Stat label="COINS" value={`🪙${coins}`} />
           <Stat label="XP" value={xp} />
           <Stat label="SLAIN" value={`${slainCount}/${bosses.length}`} />
           {!isPremium
@@ -943,7 +1028,7 @@ function GameApp({ user, onShowPolicy }) {
                       <div key={b.id} className="boss-card" style={{ ...styles.bossCard, borderColor: dead ? GOLD : meta.color, opacity: dead ? 0.65 : 1 }}
                         onClick={() => openBoss(b)}>
                         <div style={{ ...styles.bossSigil, background: `radial-gradient(circle, ${meta.color}55, transparent)` }}>
-                          <BossArt type={b.type} skin={b.skin} size={62} dead={dead} />
+                          <BossArt type={b.type} skin={b.skin} size={62} dead={dead} className={dead ? undefined : "boss-idle"} />
                         </div>
                         <div style={styles.bossName}>{b.name}</div>
                         {b.accountLabel && <div style={styles.accountTag}>🏦 {b.accountLabel}</div>}
@@ -978,7 +1063,7 @@ function GameApp({ user, onShowPolicy }) {
                 {combo >= 2 && !dead && <div style={styles.comboMeter}><span style={styles.comboNum}>{combo}×</span><span style={styles.comboLabel}>COMBO</span></div>}
                 {critText && <div className="crit-pop" style={styles.critText}>{critText}</div>}
                 <div className={hitFlash ? "shake" : ""} style={styles.battleSigil}>
-                  <BossArt type={activeBoss.type} skin={activeBoss.skin} size={170} dead={dead} className="ds-battle-art" />
+                  <BossArt type={activeBoss.type} skin={activeBoss.skin} size={170} dead={dead} className={dead ? "ds-battle-art" : "ds-battle-art boss-idle"} />
                   {embers.map((e) => <span key={e.id} className="ember" style={{ left: `${e.x}%`, "--angle": `${e.angle}deg`, "--dist": `${e.dist}px` }}>✦</span>)}
                   {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.crit ? GOLD : EMBER }}>-${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
                 </div>
@@ -1188,6 +1273,56 @@ function GameApp({ user, onShowPolicy }) {
                   <button style={styles.crownBtn} onClick={() => setView("paywall")}>👑 Upgrade to Slayer's Guild — $4.99/mo</button>
                 </>
               )}
+            </div>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>🛡 YOUR SLAYER</p>
+              <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
+                <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={120} className="boss-idle" />
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <p style={{ ...styles.setText, marginBottom: 10 }}>Choose your Slayer:</p>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
+                    {[["male", "⚔ Male"], ["female", "🗡 Female"]].map(([g, label]) => (
+                      <button key={g} onClick={() => setAvatarGender(g)}
+                        style={{ ...styles.toolBtn, padding: "10px 18px", fontSize: 13, ...(avatarGender === g ? { color: GOLD, borderColor: GOLD } : {}) }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p style={{ ...styles.setLabel, marginTop: 20 }}>ARMOR SKINS — earn 🪙 by striking your debts</p>
+              <div style={styles.skinRow}>
+                {Object.entries(PALETTES).map(([key, pal]) => {
+                  const owned = ownedSkins.includes(key);
+                  const lockedPremium = !pal.free && !isPremium;
+                  const equipped = avatarSkin === key;
+                  const cost = SKIN_COSTS[key] ?? 0;
+                  return (
+                    <button key={key} onClick={() => buyOrEquipSkin(key)}
+                      style={{
+                        ...styles.skinSwatch,
+                        background: `linear-gradient(135deg, ${pal.body1}, ${pal.body3})`,
+                        borderColor: equipped ? GOLD : "#3a3038",
+                        opacity: lockedPremium ? 0.6 : 1,
+                      }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: pal.glow, display: "block", margin: "0 auto" }} />
+                      <span style={styles.skinLabel}>{lockedPremium ? "👑 " : ""}{pal.label}</span>
+                      <span style={{ ...styles.skinLabel, color: equipped ? GOLD : "#9a8f80" }}>
+                        {equipped ? "EQUIPPED" : owned ? "Equip" : lockedPremium ? "Guild only" : `🪙${cost}`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>🔊 DUNGEON AMBIENCE</p>
+              <p style={styles.setText}>A low wind-and-drone soundscape for your slaying sessions. Generated live — no downloads.</p>
+              <button style={ambienceOn ? styles.setDangerBtn : styles.crownBtn} onClick={toggleAmbience}>
+                {ambienceOn ? "Silence the Dungeon" : "🔊 Summon the Ambience"}
+              </button>
             </div>
 
             <div style={styles.setCard}>
@@ -1571,6 +1706,10 @@ input:focus { outline: 1px solid #d4af37; }
 .victory-sigil { animation: floatBob 2.4s ease-in-out infinite; }
 @keyframes floatBob { 0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);} }
 .toast-in { animation: toastIn .4s cubic-bezier(.2,1.3,.4,1) both; }
+.boss-idle { animation: bossBreathe 4.2s ease-in-out infinite; transform-origin: center; }
+@keyframes bossBreathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.014); } }
+.ba-glow { animation: glowFlicker 3.4s ease-in-out infinite; }
+@keyframes glowFlicker { 0%,100% { opacity: 1; } 42% { opacity: .72; } 55% { opacity: .94; } 70% { opacity: .8; } }
 @keyframes toastIn { from{opacity:0;transform:translateX(120%);}to{opacity:1;transform:none;} }
 @media (max-width: 640px) {
   .ds-header { padding: 14px 16px !important; }

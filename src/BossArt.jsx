@@ -63,7 +63,7 @@ function Usurer({ p }) {
     <path d="M 156 58 l 0.5 6 l 3.5 -5 z" fill={p.bone2}/>
     <path d="M 151 66 l 3 5 l 1 -6 z" fill={p.bone2}/>
     
-    <ellipse cx="129" cy="45" rx="5.6" ry="3.8" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+    <ellipse cx="129" cy="45" rx="5.6" ry="3.8" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
     <ellipse cx="129" cy="45" rx="1.5" ry="3.2" fill={p.pupil}/>
     
     <ellipse cx="118" cy="48" rx="3" ry="2.4" fill={p.pupil}/>
@@ -104,15 +104,15 @@ function Wraith({ p }) {
   
   <ellipse cx="100" cy="52" rx="17" ry="14" fill={p.dark}/>
   
-  <circle cx="93" cy="50" r="3" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <circle cx="107" cy="50" r="3" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <circle cx="93" cy="50" r="3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <circle cx="107" cy="50" r="3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
   
   <g transform="rotate(-8 100 30)">
     <path d="M 70 30 L 100 18 L 130 30 L 100 40 Z" fill={p.horn}/>
     <path d="M 124 28 l 6 2 l -7 3 z" fill={p.dark}/>
     <rect x="97" y="14" width="6" height="5" fill={p.horn}/>
     <line x1="128" y1="31" x2="136" y2="48" stroke={p.metalDark} strokeWidth="1.5"/>
-    <circle cx="136" cy="50" r="2.5" fill={p.glow} style={{filter:`drop-shadow(0 0 2px ${p.glow})`}}/>
+    <circle cx="136" cy="50" r="2.5" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 2px ${p.glow})`}}/>
   </g>
   
   <g>
@@ -184,7 +184,7 @@ function Steed({ p }) {
     </g>
     
     <ellipse cx="153" cy="72" rx="5.4" ry="4.6" fill={p.dark}/>
-    <ellipse cx="153" cy="72" rx="3.4" ry="2.8" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+    <ellipse cx="153" cy="72" rx="3.4" ry="2.8" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
     
     <path d="M 148 56 L 142 40 L 154 50 Z" fill={p.horn}/>
     <path d="M 158 54 L 158 40 L 166 52 Z" fill={p.horn2}/>
@@ -246,8 +246,8 @@ function Colossus({ p }) {
     <line x1="110" y1="52" x2="110" y2="68"/>
   </g>
   
-  <path d="M 86 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <path d="M 106 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <path d="M 86 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <path d="M 106 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
   
   <path d="M 92 84 a 8 9 0 0 1 16 0 l 0 0 l -16 0 Z" fill={p.dark}/>
   <g stroke={p.metalDark} strokeWidth="1.6">
@@ -288,11 +288,11 @@ function Plague({ p }) {
   <path d="M 98 48 C 104 47 112 50 120 56 C 112 55 105 53 101 51 Z" fill={p.bone2}/>
   
   <circle cx="95" cy="46" r="4.6" fill={p.dark} stroke={p.metalDark} strokeWidth="1.4"/>
-  <circle cx="95" cy="46" r="2.2" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <circle cx="95" cy="46" r="2.2" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
   
   <line x1="142" y1="70" x2="134" y2="166" stroke={p.horn} strokeWidth="4.5" strokeLinecap="round"/>
   <path d="M 142 70 C 136 60 140 50 150 48 C 144 54 144 62 148 68 Z" fill={p.horn}/>
-  <circle cx="149" cy="50" r="3.4" fill={p.glow} style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <circle cx="149" cy="50" r="3.4" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
   
   <g fill={p.bone}>
     <rect x="134" y="96" width="12" height="5" rx="2.5"/>
@@ -327,7 +327,7 @@ function Shade({ p }) {
   <path d="M 100 156 C 100 164 102 170 100 178 C 98 170 100 164 100 156 Z" fill={p.fin} opacity="0.4"/>
   
   <ellipse cx="100" cy="62" rx="15" ry="13" fill={p.dark}/>
-  <ellipse cx="100" cy="60" rx="5.5" ry="6.5" fill={p.glow} style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+  <ellipse cx="100" cy="60" rx="5.5" ry="6.5" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
   <ellipse cx="100" cy="60" rx="2" ry="5" fill={p.pupil}/>
   
   <g fill={p.fin}>
@@ -375,6 +375,141 @@ export default function BossArt({ type, skin = "blood", size = 80, dead = false,
       className={className}
       style={{ display: "block", filter: dead ? "grayscale(1) brightness(.65)" : "none", overflow: "visible" }}
     >
+      <Model p={p} />
+    </svg>
+  );
+}
+
+// ============================================================
+// SLAYER AVATARS — the player's character, palette-skinned
+// ============================================================
+function SlayerM({ p }) {
+  return (
+    <g>
+<path d="M 66 70 C 56 100 54 136 60 168 L 70 158 L 76 172 L 84 160 L 84 96 Z" fill={p.body3}/>
+  <path d="M 134 70 C 144 100 146 136 140 168 L 130 158 L 124 172 L 116 160 L 116 96 Z" fill={p.body3}/>
+  
+  <g transform="rotate(24 128 56)">
+    <rect x="125" y="10" width="7" height="42" rx="2" fill={p.bone}/>
+    <rect x="118" y="50" width="21" height="6" rx="2" fill={p.metalDark}/>
+    <rect x="125.5" y="56" width="6" height="14" rx="2.5" fill={p.horn}/>
+    <circle cx="128.5" cy="73" r="4" fill={p.metal}/>
+  </g>
+  
+  <rect x="80" y="124" width="16" height="40" rx="4" fill={p.fin}/>
+  <rect x="104" y="124" width="16" height="40" rx="4" fill={p.fin}/>
+  <path d="M 78 160 L 98 160 L 98 172 L 74 172 Z" fill={p.dark}/>
+  <path d="M 102 160 L 122 160 L 126 172 L 102 172 Z" fill={p.dark}/>
+  
+  <path d="M 76 76 L 124 76 L 120 128 L 80 128 Z" fill={p.body2}/>
+  <path d="M 76 76 L 100 76 L 100 128 L 80 128 Z" fill={p.fin}/>
+  
+  <g stroke={p.dark} strokeWidth="1.8">
+    <line x1="79" y1="96" x2="121" y2="96"/>
+    <line x1="81" y1="112" x2="119" y2="112"/>
+  </g>
+  <line x1="108" y1="80" x2="116" y2="90" stroke={p.dark} strokeWidth="1.6"/>
+  
+  <path d="M 78 78 L 120 122 L 114 126 L 76 86 Z" fill={p.horn}/>
+  
+  <rect x="78" y="122" width="44" height="9" rx="2" fill={p.horn}/>
+  <rect x="96" y="121" width="9" height="11" rx="2" fill={p.metal}/>
+  <circle cx="86" cy="134" r="6" fill={p.metal}/>
+  <path d="M 82 130 L 90 130 L 88 127 L 84 127 Z" fill={p.metalDark}/>
+  
+  <path d="M 66 74 C 66 64 76 60 84 64 L 84 80 C 76 82 68 80 66 74 Z" fill={p.metalDark}/>
+  <path d="M 134 74 C 134 64 124 60 116 64 L 116 80 C 124 82 132 80 134 74 Z" fill={p.metalDark}/>
+  <path d="M 66 74 C 66 64 76 60 84 64 L 84 70 C 76 67 70 69 66 74 Z" fill={p.metal}/>
+  <path d="M 134 74 C 134 64 124 60 116 64 L 116 70 C 124 67 130 69 134 74 Z" fill={p.metal}/>
+  
+  <rect x="64" y="82" width="13" height="34" rx="6" fill={p.fin}/>
+  <rect x="123" y="82" width="13" height="34" rx="6" fill={p.fin}/>
+  <rect x="63" y="112" width="15" height="14" rx="4" fill={p.horn}/>
+  <rect x="122" y="112" width="15" height="14" rx="4" fill={p.horn}/>
+  
+  <path d="M 100 28 C 116 28 124 40 122 54 C 121 64 112 70 100 70 C 88 70 79 64 78 54 C 76 40 84 28 100 28 Z" fill={p.fin}/>
+  <path d="M 100 28 C 84 28 76 40 78 54 C 79 62 85 68 93 70 C 87 64 84 56 85 46 C 86 36 92 30 100 28 Z" fill={p.body3}/>
+  
+  <path d="M 96 28 L 100 18 L 106 28 Z" fill={p.fin}/>
+  
+  <path d="M 88 46 C 88 58 93 66 100 66 C 107 66 112 58 112 46 C 108 42 92 42 88 46 Z" fill={p.dark}/>
+  
+  <rect x="92" y="50" width="6" height="2.6" rx="1.3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <rect x="102" y="50" width="6" height="2.6" rx="1.3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  
+  <path d="M 95 62 C 98 64 102 64 105 62" fill="none" stroke={p.scar} strokeWidth="1.2" opacity="0.7"/>
+    </g>
+  );
+}
+
+function SlayerF({ p }) {
+  return (
+    <g>
+<path d="M 70 72 C 60 102 58 138 64 168 L 73 158 L 79 172 L 86 160 L 86 96 Z" fill={p.body3}/>
+  <path d="M 130 72 C 140 102 142 138 136 168 L 127 158 L 121 172 L 114 160 L 114 96 Z" fill={p.body3}/>
+  
+  <g transform="rotate(-24 72 56)">
+    <rect x="68" y="10" width="7" height="42" rx="2" fill={p.bone}/>
+    <rect x="61" y="50" width="21" height="6" rx="2" fill={p.metalDark}/>
+    <rect x="68.5" y="56" width="6" height="14" rx="2.5" fill={p.horn}/>
+    <circle cx="71.5" cy="73" r="4" fill={p.metal}/>
+  </g>
+  
+  <path d="M 116 52 C 122 62 124 76 122 90 C 121 98 117 104 113 106 C 116 98 117 88 115 78 C 113 68 112 60 110 54 Z" fill={p.dark}/>
+  <g stroke={p.body2} strokeWidth="1.4" opacity="0.9">
+    <line x1="114" y1="62" x2="120" y2="66"/>
+    <line x1="113" y1="74" x2="120" y2="78"/>
+    <line x1="113" y1="86" x2="119" y2="90"/>
+  </g>
+  <circle cx="113" cy="106" r="3" fill={p.metalDark}/>
+  
+  <rect x="83" y="124" width="14" height="40" rx="4" fill={p.fin}/>
+  <rect x="103" y="124" width="14" height="40" rx="4" fill={p.fin}/>
+  <path d="M 81 158 L 99 158 L 99 172 L 77 172 Z" fill={p.dark}/>
+  <path d="M 101 158 L 119 158 L 123 172 L 101 172 Z" fill={p.dark}/>
+  
+  <path d="M 78 76 L 122 76 L 114 104 L 118 128 L 82 128 L 86 104 Z" fill={p.body2}/>
+  <path d="M 78 76 L 100 76 L 100 128 L 82 128 L 86 104 Z" fill={p.fin}/>
+  <g stroke={p.dark} strokeWidth="1.8">
+    <path d="M 84 98 L 116 98"/>
+    <line x1="84" y1="114" x2="116" y2="114"/>
+  </g>
+  <line x1="106" y1="80" x2="112" y2="88" stroke={p.dark} strokeWidth="1.5"/>
+  
+  <path d="M 80 78 L 118 122 L 112 126 L 78 86 Z" fill={p.horn}/>
+  
+  <rect x="80" y="122" width="40" height="8" rx="2" fill={p.horn}/>
+  <rect x="96" y="121" width="8" height="10" rx="2" fill={p.metal}/>
+  <circle cx="88" cy="133" r="5.5" fill={p.metal}/>
+  
+  <path d="M 70 74 C 70 65 79 61 86 65 L 86 79 C 79 81 72 79 70 74 Z" fill={p.metalDark}/>
+  <path d="M 130 74 C 130 65 121 61 114 65 L 114 79 C 121 81 128 79 130 74 Z" fill={p.metalDark}/>
+  <path d="M 70 74 C 70 65 79 61 86 65 L 86 70 C 79 67 74 69 70 74 Z" fill={p.metal}/>
+  <path d="M 130 74 C 130 65 121 61 114 65 L 114 70 C 121 67 126 69 130 74 Z" fill={p.metal}/>
+  
+  <rect x="68" y="82" width="12" height="33" rx="6" fill={p.fin}/>
+  <rect x="120" y="82" width="12" height="33" rx="6" fill={p.fin}/>
+  <rect x="67" y="110" width="14" height="13" rx="4" fill={p.horn}/>
+  <rect x="119" y="110" width="14" height="13" rx="4" fill={p.horn}/>
+  
+  <path d="M 100 30 C 115 30 122 41 120 54 C 119 63 111 69 100 69 C 89 69 81 63 80 54 C 78 41 85 30 100 30 Z" fill={p.fin}/>
+  <path d="M 100 30 C 85 30 78 41 80 54 C 81 61 86 67 93 69 C 88 63 85 55 86 46 C 87 37 93 31 100 30 Z" fill={p.body3}/>
+  <path d="M 96 30 L 100 21 L 105 30 Z" fill={p.fin}/>
+  
+  <path d="M 89 46 C 89 57 93 64 100 64 C 107 64 111 57 111 46 C 107 43 93 43 89 46 Z" fill={p.dark}/>
+  
+  <rect x="92.5" y="50" width="5.5" height="2.4" rx="1.2" fill={p.glow} transform="rotate(-4 95 51)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <rect x="102" y="50" width="5.5" height="2.4" rx="1.2" fill={p.glow} transform="rotate(4 105 51)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+  <path d="M 96 61 C 98.5 62.5 101.5 62.5 104 61" fill="none" stroke={p.scar} strokeWidth="1.1" opacity="0.7"/>
+    </g>
+  );
+}
+
+export function SlayerAvatar({ gender = "male", skin = "blood", size = 80, className }) {
+  const p = PALETTES[skin] || PALETTES.blood;
+  const Model = gender === "female" ? SlayerF : SlayerM;
+  return (
+    <svg viewBox="0 0 200 200" width={size} height={size} className={className} style={{ display: "block", overflow: "visible" }}>
       <Model p={p} />
     </svg>
   );
