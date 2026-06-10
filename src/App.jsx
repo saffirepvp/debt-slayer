@@ -772,12 +772,12 @@ function GameApp({ user }) {
                 ) : (
                   <div style={styles.attackPanel}>
                     <p style={styles.attackHint}>Deal damage by logging a payment</p>
-                    <div style={styles.attackRow}>
+                    <div className="ds-attack-row" style={styles.attackRow}>
                       <span style={styles.dollarSign}>$</span>
                       <input type="number" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} placeholder={activeBoss.minPayment} style={styles.attackInput} />
-                      <button style={styles.strikeBtn} onClick={handleStrike}>⚔ STRIKE</button>
+                      <button className="ds-strike-btn" style={styles.strikeBtn} onClick={handleStrike}>⚔ STRIKE</button>
                     </div>
-                    <div style={styles.quickRow}>
+                    <div className="ds-quick-row" style={styles.quickRow}>
                       {[...new Set([activeBoss.minPayment, activeBoss.minPayment * 2, 500].filter((q) => q > 0))].map((q) => <button key={q} style={styles.quickBtn} onClick={() => setPayAmount(String(q))}>$ {q}</button>)}
                     </div>
                     <p style={styles.aprWarn}>⚠ This beast regenerates ~${Math.round((activeBoss.remaining * activeBoss.apr) / 100 / 12)}/mo from {activeBoss.apr}% APR</p>
@@ -833,7 +833,7 @@ function GameApp({ user }) {
               {advisorLocked ? (
                 <div style={styles.lockedChat}><p style={{ margin: 0, color: GOLD }}>👑 You've used your {FREE_COUNSEL_LIMIT} free counsels.</p><button style={styles.crownBtn} onClick={() => setView("paywall")}>Unlock Unlimited Counsel</button></div>
               ) : (
-                <div style={styles.chatInputRow}>
+                <div className="ds-chat-input-row" style={styles.chatInputRow}>
                   <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && chatInput.trim() && sendToAdvisor(chatInput.trim())} placeholder="Ask your advisor..." style={styles.chatInput} disabled={thinking} />
                   <button style={styles.sendBtn} onClick={() => chatInput.trim() && sendToAdvisor(chatInput.trim())} disabled={thinking}>Send</button>
                 </div>
@@ -1212,6 +1212,13 @@ input:focus { outline: 1px solid #d4af37; }
   .ds-brand-title { font-size: 20px !important; letter-spacing: 2px !important; }
   .ds-realm-total { font-size: 32px !important; }
   .ds-battle-emoji { font-size: 76px !important; }
+  .ds-attack-row { flex-wrap: wrap !important; padding: 10px 14px !important; }
+  .ds-attack-row input { min-width: 0 !important; }
+  .ds-strike-btn { width: 100% !important; padding: 16px !important; font-size: 16px !important; margin-top: 4px !important; }
+  .ds-quick-row button { padding: 12px 18px !important; font-size: 15px !important; }
+  .ds-chat-input-row { flex-wrap: wrap !important; }
+  .ds-chat-input-row input { width: 100% !important; flex: none !important; }
+  .ds-chat-input-row button { width: 100% !important; padding: 14px !important; }
 }
 `;
 
