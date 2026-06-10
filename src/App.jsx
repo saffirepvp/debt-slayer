@@ -383,6 +383,7 @@ function GameApp({ user, onShowPolicy }) {
   const [bossesLoading, setBossesLoading] = useState(true);
   const [showSummon, setShowSummon]   = useState(false);
   const [editBoss, setEditBoss]       = useState(null);
+  const [confirmBanish, setConfirmBanish] = useState(null);
   const [battleLog, setBattleLog]     = useState([]);
   const [activeBoss, setActiveBoss]   = useState(null);
   const [payAmount, setPayAmount]     = useState("");
@@ -454,6 +455,7 @@ function GameApp({ user, onShowPolicy }) {
             id: b.id, type: b.type, name: b.name,
             total: Number(b.total), remaining,
             apr, minPayment: Number(b.min_payment),
+            accountLabel: b.account_label || "",
           };
         });
         setBosses(loaded);
@@ -544,20 +546,29 @@ function GameApp({ user, onShowPolicy }) {
   }, [seasonDamage, profileLoaded]);
 
   // --- Summon (create) a new boss and save to Supabase ---
-  async function summonBoss({ name, type, total, apr, minPayment }) {
+  async function summonBoss({ name, type, total, apr, minPayment, accountLabel }) {
     const { data, error } = await supabase
       .from("bosses")
-      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment })
+      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment, account_label: accountLabel || null })
       .select()
       .single();
-    if (error) { alert("The summoning failed: " + error.message); return; }
-    setBosses((prev) => [...prev, {
+    if (error) { notify("The summoning failed: " + error.message); return; }
+    const newBoss = {
       id: data.id, type: data.type, name: data.name,
       total: Number(data.total), remaining: Number(data.remaining),
       apr: Number(data.apr), minPayment: Number(data.min_payment),
-    }]);
+      accountLabel: data.account_label || "",
+    };
+    setBosses((prev) => [...prev, newBoss]);
     setShowSummon(false);
     playSound("achievement");
+    openBoss(newBoss); // walk straight into the battle — meet your enemy
+  }
+
+  // --- Themed in-app notice (replaces browser alert boxes) ---
+  function notify(msg) {
+    setToast({ sigil: "⚠", name: "Hark, Slayer", desc: msg });
+    setTimeout(() => setToast(null), 4500);
   }
 
   // --- Open a boss battle and load its battle log ---
@@ -575,21 +586,25 @@ function GameApp({ user, onShowPolicy }) {
     const { error } = await supabase.from("bosses").update({
       name: updated.name, remaining: updated.remaining,
       apr: updated.apr, min_payment: updated.minPayment,
+      account_label: updated.accountLabel || null,
     }).eq("id", updated.id);
-    if (error) { alert("Update failed: " + error.message); return; }
+    if (error) { notify("Update failed: " + error.message); return; }
     setBosses((prev) => prev.map((b) => b.id === updated.id ? { ...b, ...updated } : b));
     setActiveBoss((a) => a && a.id === updated.id ? { ...a, ...updated } : a);
     setEditBoss(null);
   }
 
-  // --- Banish (delete) a boss entirely ---
-  async function banishBoss(boss) {
-    if (!window.confirm(`Banish ${boss.name} from the realm? This erases the boss and its battle log forever.`)) return;
+  // --- Banish (delete) a boss: opens themed confirm, then executes ---
+  function banishBoss(boss) { setConfirmBanish(boss); }
+
+  async function reallyBanish(boss) {
+    setConfirmBanish(null);
     const { error } = await supabase.from("bosses").delete().eq("id", boss.id);
-    if (error) { alert("The banishment failed: " + error.message); return; }
+    if (error) { notify("The banishment failed: " + error.message); return; }
     setBosses((prev) => prev.filter((b) => b.id !== boss.id));
     setActiveBoss(null);
     setView("arena");
+    notify(`${boss.name} has been banished from the realm.`);
   }
 
   // --- Generate a shareable victory card image ---
@@ -644,11 +659,11 @@ function GameApp({ user, onShowPolicy }) {
   async function enableReminders() {
     try {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        alert("Notifications aren't supported here yet. On iPhone: tap Share → Add to Home Screen first, then enable reminders from the installed app.");
+        notify("Notifications aren't supported here yet. On iPhone: add Debt Slayer to your Home Screen first, then enable reminders from the installed app.");
         return;
       }
       const perm = await Notification.requestPermission();
-      if (perm !== "granted") { alert("Notifications were blocked. You can enable them in your browser settings."); return; }
+      if (perm !== "granted") { notify("Notifications were blocked. You can enable them in your browser settings."); return; }
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
@@ -658,7 +673,7 @@ function GameApp({ user, onShowPolicy }) {
         .upsert({ user_id: user.id, subscription: sub.toJSON() }, { onConflict: "user_id" });
       if (error) throw error;
       setRemindersOn(true);
-    } catch (e) { alert("Could not enable reminders: " + e.message); }
+    } catch (e) { notify("Could not enable reminders: " + e.message); }
   }
 
   async function disableReminders() {
@@ -879,7 +894,7 @@ function GameApp({ user, onShowPolicy }) {
         {/* ARENA */}
         {view === "arena" && (
           <div className="fade-in">
-            {bossesLoading ? (
+            {(bossesLoading || !profileLoaded) ? (
               <p style={{ textAlign: "center", color: "#9a8f80", fontStyle: "italic", marginTop: 60 }}>⚔ Scouting the realm...</p>
             ) : bosses.length === 0 ? (
               <div style={styles.emptyRealm}>
@@ -926,6 +941,7 @@ function GameApp({ user, onShowPolicy }) {
                           <span style={{ fontSize: 40, filter: dead ? "grayscale(1)" : "none" }}>{meta.sigil}</span>
                         </div>
                         <div style={styles.bossName}>{b.name}</div>
+                        {b.accountLabel && <div style={styles.accountTag}>🏦 {b.accountLabel}</div>}
                         <div style={styles.bossTitle}>{dead ? "💀 SLAIN" : meta.title}</div>
                         <div style={styles.hpOuter}><div style={{ ...styles.hpInner, width: `${hp}%`, background: dead ? GOLD : `linear-gradient(90deg, ${BLOOD}, ${EMBER})` }} /></div>
                         <div style={styles.hpText}>{dead ? "Vanquished" : `$${b.remaining.toLocaleString()} HP`} · {b.apr}% APR</div>
@@ -963,6 +979,7 @@ function GameApp({ user, onShowPolicy }) {
                 </div>
                 <h2 style={styles.battleName}>{activeBoss.name}</h2>
                 <p style={styles.battleTitle}>{meta.title}</p>
+                {activeBoss.accountLabel && <p style={styles.accountTagBattle}>🏦 {activeBoss.accountLabel}</p>}
                 <div style={styles.battleHpOuter}>
                   <div style={{ ...styles.battleHpInner, width: `${hp}%` }} />
                   <span style={styles.battleHpLabel}>${activeBoss.remaining.toLocaleString()} / ${activeBoss.total.toLocaleString()}</span>
@@ -1095,7 +1112,7 @@ function GameApp({ user, onShowPolicy }) {
                     <div key={o.id} style={styles.orderRow}>
                       <span style={styles.orderNum}>{i + 1}</span>
                       <span style={{ fontSize: 26 }}>{meta.sigil}</span>
-                      <div style={{ flex: 1 }}><div style={styles.orderName}>{o.name}</div><div style={styles.orderMeta}>{boss.apr}% APR · ${boss.remaining.toLocaleString()} HP</div></div>
+                      <div style={{ flex: 1 }}><div style={styles.orderName}>{o.name}</div><div style={styles.orderMeta}>{boss.accountLabel ? boss.accountLabel + " · " : ""}{boss.apr}% APR · ${boss.remaining.toLocaleString()} HP</div></div>
                       <span style={styles.orderDate}>{fmtDate(d)}</span>
                     </div>
                   );
@@ -1157,7 +1174,7 @@ function GameApp({ user, onShowPolicy }) {
               {isPremium ? (
                 <>
                   <p style={styles.setText}>You're a member of the Slayer's Guild — unlimited bosses, the Battle Planner, and unlimited AI counsel are yours.</p>
-                  <button style={styles.setDangerBtn} onClick={() => alert("Once Stripe is connected, this opens the billing portal where you can cancel or update payment. You'll keep premium until the end of your billing period.")}>Manage / Cancel Subscription</button>
+                  <button style={styles.setDangerBtn} onClick={() => notify("Once Stripe is connected, this button opens the billing portal to cancel or update payment. You keep premium until your billing period ends.")}>Manage / Cancel Subscription</button>
                   <p style={styles.setHint}>Cancel anytime. You keep access until your billing period ends.</p>
                 </>
               ) : (
@@ -1246,6 +1263,21 @@ function GameApp({ user, onShowPolicy }) {
       {/* SUMMON BOSS MODAL */}
       {showSummon && <SummonModal onSummon={summonBoss} onClose={() => setShowSummon(false)} />}
 
+      {/* BANISH CONFIRM */}
+      {confirmBanish && (
+        <div style={styles.summonOverlay} onClick={() => setConfirmBanish(null)}>
+          <div className="victory-burst" style={{ ...styles.summonCard, maxWidth: 420, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+            <span style={{ fontSize: 50 }}>☠</span>
+            <h2 style={{ ...styles.summonTitle, marginTop: 10 }}>Banish {confirmBanish.name}?</h2>
+            <p style={styles.summonSub}>The boss and its entire battle log will be erased from the realm forever. This cannot be undone.</p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 20, flexWrap: "wrap" }}>
+              <button style={{ ...styles.toolBtn, padding: "12px 22px", fontSize: 14 }} onClick={() => setConfirmBanish(null)}>Spare It</button>
+              <button style={{ ...styles.strikeBtn }} onClick={() => reallyBanish(confirmBanish)}>☠ BANISH FOREVER</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* EDIT BOSS MODAL */}
       {editBoss && <EditBossModal boss={editBoss} onSave={updateBoss} onClose={() => setEditBoss(null)} />}
 
@@ -1302,6 +1334,7 @@ function SummonModal({ onSummon, onClose }) {
   const [step, setStep]       = useState(1);
   const [type, setType]       = useState(null);
   const [name, setName]       = useState("");
+  const [accountLabel, setAccountLabel] = useState("");
   const [total, setTotal]     = useState("");
   const [apr, setApr]         = useState("");
   const [minPayment, setMinPayment] = useState("");
@@ -1325,6 +1358,7 @@ function SummonModal({ onSummon, onClose }) {
       total: t,
       apr: parseFloat(apr) || 0,
       minPayment: parseFloat(minPayment) || 0,
+      accountLabel: accountLabel.trim(),
     });
     setSummoning(false);
   }
@@ -1365,6 +1399,9 @@ function SummonModal({ onSummon, onClose }) {
               <input style={{ ...styles.summonInput, marginBottom: 0, flex: 1 }} value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
               <button style={styles.rerollBtn} onClick={rerollName} title="Roll a new name">🎲</button>
             </div>
+
+            <label style={styles.summonLabel}>WHICH REAL DEBT IS THIS? <span style={styles.optionalTag}>(so you never lose track)</span></label>
+            <input style={styles.summonInput} placeholder="e.g. Chase Visa ending 4821" value={accountLabel} onChange={(e) => setAccountLabel(e.target.value)} maxLength={50} />
 
             <label style={styles.summonLabel}>HOW MUCH DO YOU OWE? (the boss's HP)</label>
             <div style={styles.moneyRow}>
@@ -1413,6 +1450,7 @@ function EditBossModal({ boss, onSave, onClose }) {
   const [remaining, setRemaining]   = useState(String(boss.remaining));
   const [apr, setApr]               = useState(String(boss.apr));
   const [minPayment, setMinPayment] = useState(String(boss.minPayment));
+  const [accountLabel, setAccountLabel] = useState(boss.accountLabel || "");
   const [saving, setSaving]         = useState(false);
   const meta = BOSS_TYPES[boss.type];
 
@@ -1426,6 +1464,7 @@ function EditBossModal({ boss, onSave, onClose }) {
       remaining: r,
       apr: parseFloat(apr) || 0,
       minPayment: parseFloat(minPayment) || 0,
+      accountLabel: accountLabel.trim(),
     });
     setSaving(false);
   }
@@ -1442,6 +1481,9 @@ function EditBossModal({ boss, onSave, onClose }) {
 
         <label style={styles.summonLabel}>BOSS NAME</label>
         <input style={styles.summonInput} value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
+
+        <label style={styles.summonLabel}>WHICH REAL DEBT IS THIS?</label>
+        <input style={styles.summonInput} placeholder="e.g. Chase Visa ending 4821" value={accountLabel} onChange={(e) => setAccountLabel(e.target.value)} maxLength={50} />
 
         <label style={styles.summonLabel}>CURRENT BALANCE (its HP)</label>
         <div style={styles.moneyRow}>
@@ -1722,6 +1764,8 @@ const styles = {
   planUnit: { fontSize:13, color:"#9a8f80", fontWeight:400 },
   planEquiv: { fontSize:11, color:GOLD, fontStyle:"italic", fontFamily:"'EB Garamond',serif" },
   planSaveTag: { position:"absolute", top:-10, right:-8, background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", fontSize:10, padding:"3px 8px", borderRadius:4, letterSpacing:1 },
+  accountTag: { fontSize:11, color:"#8a9ab0", background:"#10141c", border:"1px solid #2a3242", borderRadius:4, padding:"3px 8px", display:"inline-block", margin:"6px auto 2px", fontFamily:"'EB Garamond',serif" },
+  accountTagBattle: { fontSize:13, color:"#8a9ab0", background:"#10141c", border:"1px solid #2a3242", borderRadius:4, padding:"4px 12px", display:"inline-block", margin:"4px 0 0", fontFamily:"'EB Garamond',serif" },
 };
 
 const authStyles = {
