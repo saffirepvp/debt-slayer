@@ -57,6 +57,9 @@ const SEASONS = [
 ];
 
 function currentSeason() { return SEASONS[new Date().getMonth() % SEASONS.length]; }
+const SEASON_KEY = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+const FREE_BOSS_LIMIT = 2;
+const FREE_COUNSEL_LIMIT = 5;
 const STREAK_RANKS = ["Squire", "Knight", "Champion", "Warlord", "Legend"];
 function daysLeftInMonth() {
   const now = new Date();
@@ -203,6 +206,9 @@ function GameApp({ user }) {
   const [stats, setStats] = useState({ totalStrikes: 0, totalDamage: 0, bossesSlain: 0, biggestSlain: 0, seasonsWon: 0, streak: 0 });
   const [unlocked, setUnlocked]       = useState([]);
   const [seasonDamage, setSeasonDamage] = useState(0);
+  const [counselsUsed, setCounselsUsed] = useState(0);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const goalCounted = useRef(false);
   const [toast, setToast]             = useState(null);
   const season = currentSeason();
 
@@ -231,6 +237,78 @@ function GameApp({ user }) {
     }
     loadBosses();
   }, [user.id]);
+
+  // --- Load (or create) this user's profile: xp, streak, season, counsels ---
+  useEffect(() => {
+    async function loadProfile() {
+      let { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      if (!p) {
+        const { data: created } = await supabase.from("profiles").insert({ id: user.id }).select().single();
+        p = created;
+      }
+      const { data: ach } = await supabase.from("achievements").select("achievement_id");
+      if (p) {
+        let sd = Number(p.season_damage) || 0;
+        let streak = p.streak || 0;
+        let seasonsWon = p.seasons_won || 0;
+        // Month changed since last visit? Settle last season.
+        if (p.season_key && p.season_key !== SEASON_KEY) {
+          if (sd < season.goal) streak = 0; // goal missed: streak breaks (wins were already counted live)
+          sd = 0;
+        }
+        goalCounted.current = sd >= season.goal;
+        setXp(p.xp || 0);
+        setStats({
+          totalStrikes: p.total_strikes || 0,
+          totalDamage: Number(p.total_damage) || 0,
+          bossesSlain: p.bosses_slain || 0,
+          biggestSlain: Number(p.biggest_slain) || 0,
+          seasonsWon, streak,
+        });
+        setSeasonDamage(sd);
+        setCounselsUsed(p.counsels_used || 0);
+        setIsPremium(!!p.is_premium);
+      }
+      if (ach) setUnlocked(ach.map((a) => a.achievement_id));
+      setProfileLoaded(true);
+    }
+    loadProfile();
+  }, [user.id]);
+
+  // --- Auto-save profile whenever progress changes (debounced) ---
+  useEffect(() => {
+    if (!profileLoaded) return;
+    const t = setTimeout(() => {
+      supabase.from("profiles").upsert({
+        id: user.id,
+        xp,
+        streak: stats.streak,
+        seasons_won: stats.seasonsWon,
+        season_key: SEASON_KEY,
+        season_damage: seasonDamage,
+        total_strikes: stats.totalStrikes,
+        total_damage: stats.totalDamage,
+        bosses_slain: stats.bossesSlain,
+        biggest_slain: stats.biggestSlain,
+        counsels_used: counselsUsed,
+        is_premium: isPremium,
+        updated_at: new Date().toISOString(),
+      }).then(({ error }) => { if (error) console.error("Profile save failed:", error.message); });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [xp, stats, seasonDamage, counselsUsed, isPremium, profileLoaded]);
+
+  // --- Award the season badge the moment the goal is crossed ---
+  useEffect(() => {
+    if (!profileLoaded) return;
+    if (seasonDamage >= season.goal && !goalCounted.current) {
+      goalCounted.current = true;
+      setStats((s) => ({ ...s, seasonsWon: s.seasonsWon + 1, streak: s.streak + 1 }));
+      setToast({ sigil: season.sigil, name: `${season.name} Conquered!`, desc: "Season badge earned \u00b7 streak extended" });
+      playSound("victory");
+      setTimeout(() => setToast(null), 4500);
+    }
+  }, [seasonDamage, profileLoaded]);
 
   // --- Summon (create) a new boss and save to Supabase ---
   async function summonBoss({ name, type, total, apr, minPayment }) {
@@ -263,6 +341,8 @@ function GameApp({ user }) {
         setToast({ sigil: a.sigil, name: a.name, desc: a.desc });
         playSound("achievement");
         setTimeout(() => setToast(null), 4000);
+        supabase.from("achievements").insert({ user_id: user.id, achievement_id: a.id })
+          .then(({ error }) => { if (error && !error.message.includes("duplicate")) console.error(error.message); });
       }
     });
   }, [stats, level]);
@@ -350,6 +430,7 @@ function GameApp({ user }) {
   async function sendToAdvisor(userMsg) {
     const next = [...chat, { role: "user", content: userMsg }];
     setChat(next); setChatInput(""); setThinking(true);
+    if (!isPremium) setCounselsUsed((c) => c + 1);
     const debtContext = bosses.map((b) => `${b.name} (${b.type}): $${b.remaining} left of $${b.total}, ${b.apr}% APR, min $${b.minPayment}/mo`).join("; ");
     const systemPrompt = `You are ${advisor.name}, a ${advisor.style} debt-advisor character in a dark fantasy RPG called Debt Slayer. Stay in character with light medieval-fantasy flavor, but give GENUINELY useful, accurate personal-finance advice (avalanche vs snowball, interest math, prioritization). Keep replies under 120 words. The player's current debts: ${debtContext}. Total debt: $${totalDebt}.`;
     try {
@@ -366,8 +447,7 @@ function GameApp({ user }) {
     } finally { setThinking(false); }
   }
 
-  const freeAdvisorUses = chat.filter((m) => m.role === "user").length;
-  const advisorLocked   = !isPremium && freeAdvisorUses >= 3;
+  const advisorLocked = !isPremium && counselsUsed >= FREE_COUNSEL_LIMIT;
 
   async function handleSignOut() { await supabase.auth.signOut(); }
 
@@ -436,7 +516,7 @@ function GameApp({ user }) {
                   <button
                     style={styles.summonSmallBtn}
                     onClick={() => {
-                      if (!isPremium && bosses.length >= 1) return setView("paywall");
+                      if (!isPremium && bosses.length >= FREE_BOSS_LIMIT) return setView("paywall");
                       setShowSummon(true);
                     }}
                   >
@@ -462,7 +542,7 @@ function GameApp({ user }) {
                     );
                   })}
                 </div>
-                {!isPremium && bosses.length >= 1 && <p style={styles.freeTierNote}>Free Slayers track 1 boss. <button style={styles.inlineLink} onClick={() => setView("paywall")}>Join the Guild</button> to summon them all.</p>}
+                {!isPremium && bosses.length >= FREE_BOSS_LIMIT && <p style={styles.freeTierNote}>Free Slayers track {FREE_BOSS_LIMIT} bosses. <button style={styles.inlineLink} onClick={() => setView("paywall")}>Join the Guild</button> to summon them all.</p>}
               </>
             )}
           </div>
@@ -501,7 +581,7 @@ function GameApp({ user }) {
                       <button style={styles.strikeBtn} onClick={handleStrike}>⚔ STRIKE</button>
                     </div>
                     <div style={styles.quickRow}>
-                      {[activeBoss.minPayment, activeBoss.minPayment * 2, 500].map((q) => <button key={q} style={styles.quickBtn} onClick={() => setPayAmount(String(q))}>$ {q}</button>)}
+                      {[...new Set([activeBoss.minPayment, activeBoss.minPayment * 2, 500].filter((q) => q > 0))].map((q) => <button key={q} style={styles.quickBtn} onClick={() => setPayAmount(String(q))}>$ {q}</button>)}
                     </div>
                     <p style={styles.aprWarn}>⚠ This beast regenerates ~${Math.round((activeBoss.remaining * activeBoss.apr) / 100 / 12)}/mo from {activeBoss.apr}% APR</p>
                   </div>
@@ -540,14 +620,14 @@ function GameApp({ user }) {
                 <div ref={chatEndRef} />
               </div>
               {advisorLocked ? (
-                <div style={styles.lockedChat}><p style={{ margin: 0, color: GOLD }}>👑 You've used your 3 free counsels.</p><button style={styles.crownBtn} onClick={() => setView("paywall")}>Unlock Unlimited Counsel</button></div>
+                <div style={styles.lockedChat}><p style={{ margin: 0, color: GOLD }}>👑 You've used your {FREE_COUNSEL_LIMIT} free counsels.</p><button style={styles.crownBtn} onClick={() => setView("paywall")}>Unlock Unlimited Counsel</button></div>
               ) : (
                 <div style={styles.chatInputRow}>
                   <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && chatInput.trim() && sendToAdvisor(chatInput.trim())} placeholder="Ask your advisor..." style={styles.chatInput} disabled={thinking} />
                   <button style={styles.sendBtn} onClick={() => chatInput.trim() && sendToAdvisor(chatInput.trim())} disabled={thinking}>Send</button>
                 </div>
               )}
-              {!isPremium && !advisorLocked && <p style={styles.freeCounsel}>{3 - freeAdvisorUses} free counsels remaining</p>}
+              {!isPremium && !advisorLocked && <p style={styles.freeCounsel}>{Math.max(0, FREE_COUNSEL_LIMIT - counselsUsed)} free counsels remaining</p>}
             </div>
           </div>
         )}
@@ -626,7 +706,7 @@ function GameApp({ user }) {
                     <span style={styles.seasonBarLabel}>${seasonDamage.toLocaleString()} / ${season.goal.toLocaleString()} slain</span>
                   </div>
                   {seasonDone ? <p style={styles.seasonReward}>🏆 Season conquered! Badge & skin unlocked.</p> : <p style={styles.seasonRewardPending}>Reach the goal to earn the <b style={{ color: season.color }}>{season.name}</b> badge. Resets in {daysLeftInMonth()} days.</p>}
-                  {!isPremium && <p style={styles.seasonFree}>Free Slayers see the season. <button style={styles.inlineLink} onClick={() => setView("paywall")}>Join the Guild</button> to earn badges & skins.</p>}
+                  
                 </div>
               </div>
               <div style={styles.streakBox}>
@@ -653,9 +733,9 @@ function GameApp({ user }) {
             <p style={styles.paywallSub}>Unlock the full arsenal for your campaign against debt.</p>
             <div style={styles.priceTag}><span style={styles.price}>$4.99</span><span style={styles.priceUnit}>/month</span></div>
             <div style={styles.featureList}>
-              {["🗺 The Battle Planner — exact slaying order + interest saved","🔮 Unlimited AI War Council across all 3 advisors","⚔ Unlimited bosses (free tier tracks 1)","🏆 Seasonal slaying events & achievement badges","🎨 Legendary boss skins & dark realm themes","🔔 Payment reminders so no boss regenerates interest"].map((f) => <div key={f} style={styles.featureItem}>{f}</div>)}
+              {["🗺 The Battle Planner — exact payoff order, debt-free date & interest saved","🔮 Unlimited AI War Council across all 3 advisors","⚔ Unlimited bosses (free tier tracks 2)","🏆 Permanent season badges, streak ranks & achievements"].map((f) => <div key={f} style={styles.featureItem}>{f}</div>)}
             </div>
-            <button style={styles.subscribeBtn} onClick={() => { setIsPremium(true); setView("advisor"); }}>⚔ ENLIST NOW (Demo: instant unlock)</button>
+            <button style={styles.subscribeBtn} onClick={() => { setIsPremium(true); setView("advisor"); }}>⚔ ENLIST NOW (Demo unlock — Stripe coming next)</button>
             <button style={styles.maybeLater} onClick={() => setView("arena")}>Maybe later</button>
           </div>
         )}
@@ -692,6 +772,7 @@ function GameApp({ user }) {
 
       <footer style={styles.footer}>
         Debt Slayer · a dark fantasy money RPG · signed in as {user.email || "Slayer"}
+        <br />Payoff projections are estimates only — not financial advice.
         <button style={{ ...styles.inlineLink, marginLeft: 12 }} onClick={handleSignOut}>sign out</button>
       </footer>
     </div>
