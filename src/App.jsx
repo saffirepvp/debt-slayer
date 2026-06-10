@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
+import BossArt, { PALETTES, FREE_SKINS } from "./BossArt";
 
 // ============================================================
 // DEBT SLAYER — Dark Fantasy Debt-Tracking RPG
@@ -456,6 +457,7 @@ function GameApp({ user, onShowPolicy }) {
             total: Number(b.total), remaining,
             apr, minPayment: Number(b.min_payment),
             accountLabel: b.account_label || "",
+            skin: b.skin || "blood",
           };
         });
         setBosses(loaded);
@@ -547,9 +549,10 @@ function GameApp({ user, onShowPolicy }) {
 
   // --- Summon (create) a new boss and save to Supabase ---
   async function summonBoss({ name, type, total, apr, minPayment, accountLabel }) {
+    const skin = FREE_SKINS[bosses.length % FREE_SKINS.length]; // auto-rotate looks
     const { data, error } = await supabase
       .from("bosses")
-      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment, account_label: accountLabel || null })
+      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment, account_label: accountLabel || null, skin })
       .select()
       .single();
     if (error) { notify("The summoning failed: " + error.message); return; }
@@ -558,6 +561,7 @@ function GameApp({ user, onShowPolicy }) {
       total: Number(data.total), remaining: Number(data.remaining),
       apr: Number(data.apr), minPayment: Number(data.min_payment),
       accountLabel: data.account_label || "",
+      skin: data.skin || "blood",
     };
     setBosses((prev) => [...prev, newBoss]);
     setShowSummon(false);
@@ -587,6 +591,7 @@ function GameApp({ user, onShowPolicy }) {
       name: updated.name, remaining: updated.remaining,
       apr: updated.apr, min_payment: updated.minPayment,
       account_label: updated.accountLabel || null,
+      skin: updated.skin || "blood",
     }).eq("id", updated.id);
     if (error) { notify("Update failed: " + error.message); return; }
     setBosses((prev) => prev.map((b) => b.id === updated.id ? { ...b, ...updated } : b));
@@ -938,7 +943,7 @@ function GameApp({ user, onShowPolicy }) {
                       <div key={b.id} className="boss-card" style={{ ...styles.bossCard, borderColor: dead ? GOLD : meta.color, opacity: dead ? 0.65 : 1 }}
                         onClick={() => openBoss(b)}>
                         <div style={{ ...styles.bossSigil, background: `radial-gradient(circle, ${meta.color}55, transparent)` }}>
-                          <span style={{ fontSize: 40, filter: dead ? "grayscale(1)" : "none" }}>{meta.sigil}</span>
+                          <BossArt type={b.type} skin={b.skin} size={62} dead={dead} />
                         </div>
                         <div style={styles.bossName}>{b.name}</div>
                         {b.accountLabel && <div style={styles.accountTag}>🏦 {b.accountLabel}</div>}
@@ -973,7 +978,7 @@ function GameApp({ user, onShowPolicy }) {
                 {combo >= 2 && !dead && <div style={styles.comboMeter}><span style={styles.comboNum}>{combo}×</span><span style={styles.comboLabel}>COMBO</span></div>}
                 {critText && <div className="crit-pop" style={styles.critText}>{critText}</div>}
                 <div className={hitFlash ? "shake" : ""} style={styles.battleSigil}>
-                  <span className="ds-battle-emoji" style={{ fontSize: 110, filter: dead ? "grayscale(1) blur(1px)" : "none", display: "inline-block" }}>{meta.sigil}</span>
+                  <BossArt type={activeBoss.type} skin={activeBoss.skin} size={170} dead={dead} className="ds-battle-art" />
                   {embers.map((e) => <span key={e.id} className="ember" style={{ left: `${e.x}%`, "--angle": `${e.angle}deg`, "--dist": `${e.dist}px` }}>✦</span>)}
                   {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.crit ? GOLD : EMBER }}>-${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
                 </div>
@@ -1252,7 +1257,7 @@ function GameApp({ user, onShowPolicy }) {
               </button>
             </div>
             <div style={styles.featureList}>
-              {["🗺 The Battle Planner — exact payoff order, debt-free date & interest saved","🔮 Unlimited AI War Council across all 3 advisors","⚔ Unlimited bosses (free tier tracks 2)","🏆 Permanent season badges, streak ranks & achievements"].map((f) => <div key={f} style={styles.featureItem}>{f}</div>)}
+              {["🗺 The Battle Planner — exact payoff order, debt-free date & interest saved","🔮 Unlimited AI War Council across all 3 advisors","⚔ Unlimited bosses (free tier tracks 2)","🏆 Permanent season badges, streak ranks & achievements","🎨 Legendary boss skins — Gilded & Void"].map((f) => <div key={f} style={styles.featureItem}>{f}</div>)}
             </div>
             <button style={styles.subscribeBtn} onClick={() => { setIsPremium(true); setView("advisor"); }}>⚔ ENLIST NOW (Demo unlock — Stripe coming next)</button>
             <button style={styles.maybeLater} onClick={() => setView("arena")}>Maybe later</button>
@@ -1279,7 +1284,7 @@ function GameApp({ user, onShowPolicy }) {
       )}
 
       {/* EDIT BOSS MODAL */}
-      {editBoss && <EditBossModal boss={editBoss} onSave={updateBoss} onClose={() => setEditBoss(null)} />}
+      {editBoss && <EditBossModal boss={editBoss} onSave={updateBoss} onClose={() => setEditBoss(null)} isPremium={isPremium} onUpgrade={() => { setEditBoss(null); setView("paywall"); }} />}
 
       {/* VICTORY OVERLAY */}
       {victoryBoss && (() => {
@@ -1288,7 +1293,7 @@ function GameApp({ user, onShowPolicy }) {
           <div style={styles.victoryOverlay} onClick={() => { setVictoryBoss(null); setView("arena"); }}>
             <div className="victory-burst" style={styles.victoryCard}>
               <div className="victory-rays" style={styles.victoryRays} />
-              <div className="victory-sigil" style={{ fontSize: 90 }}>{meta.sigil}</div>
+              <div className="victory-sigil"><BossArt type={victoryBoss.type} skin={victoryBoss.skin} size={130} /></div>
               <p style={styles.victoryBanner}>⚜ BOSS SLAIN ⚜</p>
               <h2 style={styles.victoryBossName}>{victoryBoss.name}</h2>
               <p style={styles.victoryFlavor}>The {meta.title} falls. The realm grows brighter.</p>
@@ -1377,7 +1382,7 @@ function SummonModal({ onSummon, onClose }) {
             <div style={styles.typeGrid}>
               {Object.entries(BOSS_TYPES).map(([key, t]) => (
                 <button key={key} style={styles.typeCard} onClick={() => pickType(key)} className="boss-card">
-                  <span style={{ fontSize: 36 }}>{t.sigil}</span>
+                  <BossArt type={key} size={54} />
                   <span style={styles.typeName}>{key === "credit" ? "Credit Card" : key === "student" ? "Student Loan" : key === "car" ? "Car Loan" : key === "mortgage" ? "Mortgage" : key === "medical" ? "Medical Debt" : "Personal Loan"}</span>
                   <span style={styles.typeTitle}>{t.title}</span>
                 </button>
@@ -1389,8 +1394,8 @@ function SummonModal({ onSummon, onClose }) {
         {step === 2 && meta && (
           <>
             <button style={styles.summonBack} onClick={() => setStep(1)}>← choose another foe</button>
-            <div style={{ textAlign: "center", marginBottom: 8 }}>
-              <span style={{ fontSize: 64, filter: `drop-shadow(0 0 20px ${meta.color})` }}>{meta.sigil}</span>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, filter: `drop-shadow(0 0 20px ${meta.color})` }}>
+              <BossArt type={type} size={92} />
             </div>
             <h2 style={{ ...styles.summonTitle, marginTop: 0 }}>Name Your Foe</h2>
 
@@ -1445,7 +1450,8 @@ function PlanStat({ label, value, big, gold }) {
 // ============================================================
 // EDIT BOSS MODAL — fix typos, update balances, refinance
 // ============================================================
-function EditBossModal({ boss, onSave, onClose }) {
+function EditBossModal({ boss, onSave, onClose, isPremium, onUpgrade }) {
+  const [skin, setSkin]             = useState(boss.skin || "blood");
   const [name, setName]             = useState(boss.name);
   const [remaining, setRemaining]   = useState(String(boss.remaining));
   const [apr, setApr]               = useState(String(boss.apr));
@@ -1465,6 +1471,7 @@ function EditBossModal({ boss, onSave, onClose }) {
       apr: parseFloat(apr) || 0,
       minPayment: parseFloat(minPayment) || 0,
       accountLabel: accountLabel.trim(),
+      skin,
     });
     setSaving(false);
   }
@@ -1473,10 +1480,34 @@ function EditBossModal({ boss, onSave, onClose }) {
     <div style={styles.summonOverlay} onClick={onClose}>
       <div className="victory-burst" style={styles.summonCard} onClick={(e) => e.stopPropagation()}>
         <button style={styles.summonClose} onClick={onClose}>✕</button>
-        <div style={{ textAlign: "center", marginBottom: 8 }}>
-          <span style={{ fontSize: 56, filter: `drop-shadow(0 0 20px ${meta.color})` }}>{meta.sigil}</span>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, filter: `drop-shadow(0 0 20px ${meta.color})` }}>
+          <BossArt type={boss.type} skin={skin} size={92} />
         </div>
         <h2 style={{ ...styles.summonTitle, marginTop: 0 }}>Edit Boss</h2>
+
+        <label style={styles.summonLabel}>BOSS SKIN</label>
+        <div style={styles.skinRow}>
+          {Object.entries(PALETTES).map(([key, pal]) => {
+            const locked = !pal.free && !isPremium;
+            const selected = skin === key;
+            return (
+              <button
+                key={key}
+                onClick={() => (locked ? onUpgrade() : setSkin(key))}
+                style={{
+                  ...styles.skinSwatch,
+                  background: `linear-gradient(135deg, ${pal.body1}, ${pal.body3})`,
+                  borderColor: selected ? "#d4af37" : "#3a3038",
+                  opacity: locked ? 0.6 : 1,
+                }}
+                title={pal.label + (locked ? " — Slayer's Guild" : "")}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: pal.glow, display: "block", margin: "0 auto" }} />
+                <span style={styles.skinLabel}>{locked ? "👑 " : ""}{pal.label}</span>
+              </button>
+            );
+          })}
+        </div>
         <p style={styles.summonSub}>Balances change. Update the beast to match reality.</p>
 
         <label style={styles.summonLabel}>BOSS NAME</label>
@@ -1549,6 +1580,7 @@ input:focus { outline: 1px solid #d4af37; }
   .ds-brand-title { font-size: 20px !important; letter-spacing: 2px !important; }
   .ds-realm-total { font-size: 32px !important; }
   .ds-battle-emoji { font-size: 76px !important; }
+  .ds-battle-art { width: 120px !important; height: 120px !important; }
   .ds-attack-row { flex-wrap: wrap !important; padding: 10px 14px !important; }
   .ds-attack-row input { min-width: 0 !important; }
   .ds-strike-btn { width: 100% !important; padding: 16px !important; font-size: 16px !important; margin-top: 4px !important; }
@@ -1765,6 +1797,9 @@ const styles = {
   planEquiv: { fontSize:11, color:GOLD, fontStyle:"italic", fontFamily:"'EB Garamond',serif" },
   planSaveTag: { position:"absolute", top:-10, right:-8, background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", fontSize:10, padding:"3px 8px", borderRadius:4, letterSpacing:1 },
   accountTag: { fontSize:11, color:"#8a9ab0", background:"#10141c", border:"1px solid #2a3242", borderRadius:4, padding:"3px 8px", display:"inline-block", margin:"6px auto 2px", fontFamily:"'EB Garamond',serif" },
+  skinRow: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 },
+  skinSwatch: { flex:"1 1 72px", minWidth:72, border:"2px solid", borderRadius:8, padding:"10px 6px 8px", cursor:"pointer", display:"flex", flexDirection:"column", gap:6 },
+  skinLabel: { fontSize:10, color:"#e8e0d4", letterSpacing:1, fontFamily:"'Cinzel',serif", textAlign:"center", display:"block" },
   accountTagBattle: { fontSize:13, color:"#8a9ab0", background:"#10141c", border:"1px solid #2a3242", borderRadius:4, padding:"4px 12px", display:"inline-block", margin:"4px 0 0", fontFamily:"'EB Garamond',serif" },
 };
 
