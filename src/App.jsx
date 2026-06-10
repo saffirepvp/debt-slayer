@@ -68,9 +68,86 @@ function daysLeftInMonth() {
 }
 
 // ============================================================
+// POLICY PAGES — terms, privacy, refunds
+// ============================================================
+const POLICY_CONTENT = {
+  terms: {
+    title: "Terms of Service",
+    updated: "Last updated: this is a starter template — have a professional review before launch.",
+    sections: [
+      ["Acceptance", "By creating an account or using Debt Slayer, you agree to these terms. If you don't agree, please don't use the service."],
+      ["What Debt Slayer is", "Debt Slayer is a gamified debt-tracking tool. You manually enter your debts and log payments. We display balances, projections, and educational strategy content in a role-playing-game format. It is a tracking and motivation tool, not a bank, lender, or licensed financial advisor."],
+      ["Not financial advice", "All projections, the Battle Planner, and the AI advisor characters provide general educational information only. They are estimates based on the numbers you enter and standard formulas. They are not personalized financial, legal, or tax advice. For decisions that matter, consult a qualified professional."],
+      ["Your account", "You're responsible for keeping your login secure and for the accuracy of the debt information you enter. You must be at least 18 years old to subscribe to a paid plan."],
+      ["Subscriptions", "The Slayer's Guild is a recurring monthly subscription billed through our payment processor. It renews automatically until cancelled. See the Cancellation & Refunds policy for details."],
+      ["Acceptable use", "Don't abuse, reverse-engineer, or attempt to disrupt the service. We may suspend accounts that do."],
+      ["Changes", "We may update these terms as the product grows. We'll note the date of the latest revision here."],
+    ],
+  },
+  privacy: {
+    title: "Privacy Policy",
+    updated: "Last updated: this is a starter template — have a professional review before launch.",
+    sections: [
+      ["What we collect", "Your email address (for login), the debt information you choose to enter (names, balances, APRs, payments), and your in-app progress (XP, streaks, achievements). We do NOT collect or store bank credentials or account numbers."],
+      ["How we use it", "To run the service: to show your bosses, save your progress, calculate projections, and power the AI advisor responses. We don't sell your personal data."],
+      ["Third parties", "We use trusted providers to operate: a hosting provider, a database/authentication provider, a payment processor for subscriptions, and an AI provider that powers the advisor characters. Your debt context may be sent to the AI provider to generate advice. Each provider handles data under their own privacy terms."],
+      ["Data security", "We use industry-standard authentication and database security. No system is perfectly secure, but we never handle your banking logins, which keeps the most sensitive data out of scope entirely."],
+      ["Your control", "You can edit or banish (delete) any boss at any time, and you can request deletion of your account and associated data by contacting us."],
+      ["Cookies", "We use essential cookies to keep you logged in. We don't run advertising trackers."],
+    ],
+  },
+  refunds: {
+    title: "Cancellation & Refunds",
+    updated: "Last updated: this is a starter template — have a professional review before launch.",
+    sections: [
+      ["Cancel anytime", "You can cancel the Slayer's Guild subscription at any time from your Settings page or through the payment processor's portal. There are no cancellation fees."],
+      ["What happens when you cancel", "You keep premium access until the end of the billing period you've already paid for. After that, your account returns to the free tier. Your data — bosses, progress, history — is preserved."],
+      ["Refunds", "Because this is a low-cost monthly subscription, we generally don't offer partial refunds for time already elapsed in a billing period. If you were charged in error or have a billing problem, contact us and we'll make it right."],
+      ["Free trial / free tier", "The free tier lets you try the core experience (2 bosses, 5 AI counsels) at no cost and with no card required, so you can decide before paying."],
+      ["Contact", "For any billing question, reach out at the support email listed in the app. (Add your real support email before launch.)"],
+    ],
+  },
+};
+
+function PolicyPage({ which, onBack }) {
+  const p = POLICY_CONTENT[which];
+  return (
+    <div style={policyStyles.page}>
+      <style>{css}</style>
+      <div style={policyStyles.inner} className="fade-in">
+        <button style={policyStyles.back} onClick={onBack}>← back</button>
+        <h1 style={policyStyles.title}>{p.title}</h1>
+        <p style={policyStyles.updated}>{p.updated}</p>
+        {p.sections.map(([h, body]) => (
+          <div key={h} style={policyStyles.section}>
+            <h2 style={policyStyles.h2}>{h}</h2>
+            <p style={policyStyles.body}>{body}</p>
+          </div>
+        ))}
+        <p style={policyStyles.disclaimer}>
+          ⚠ These policies are starter templates to get you launched, not legal advice. Before taking real payments, have a lawyer (or a reputable policy generator) tailor them to your business and jurisdiction.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const policyStyles = {
+  page: { fontFamily: "'EB Garamond',serif", background: "radial-gradient(ellipse at top,#1a1218 0%,#050304 100%)", minHeight: "100vh", color: "#e8e0d4", padding: "40px 20px" },
+  inner: { maxWidth: 720, margin: "0 auto" },
+  back: { background: "none", border: "none", color: "#9a8f80", cursor: "pointer", fontSize: 14, fontStyle: "italic", marginBottom: 20 },
+  title: { fontFamily: "'Cinzel',serif", fontSize: 32, color: GOLD, letterSpacing: 1, margin: "0 0 6px" },
+  updated: { color: "#7a7060", fontStyle: "italic", fontSize: 13, marginBottom: 30 },
+  section: { marginBottom: 24 },
+  h2: { fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e8e0d4", margin: "0 0 8px" },
+  body: { color: "#b8ac98", fontSize: 15, lineHeight: 1.7, margin: 0 },
+  disclaimer: { marginTop: 36, padding: "16px 20px", background: "#1c1016", border: `1px solid ${BLOOD}55`, borderRadius: 8, color: "#c8a89a", fontSize: 13.5, lineHeight: 1.65, fontStyle: "italic" },
+};
+
+// ============================================================
 // LANDING PAGE — what strangers see before signing up
 // ============================================================
-function LandingPage({ onEnter }) {
+function LandingPage({ onEnter, onShowPolicy }) {
   return (
     <div style={landing.page}>
       <style>{css}</style>
@@ -112,6 +189,24 @@ function LandingPage({ onEnter }) {
         </div>
       </div>
 
+      {/* FAQ */}
+      <div style={landing.faqWrap} className="fade-in">
+        <h2 style={landing.faqTitle}>Questions, answered</h2>
+        {[
+          ["Is this a real debt tracker or just a game?", "Both. Every boss is one of your real debts with its real balance and APR. When you log a payment, the balance updates and saves. Interest accrues over time based on the APR, so the numbers track your actual payoff. The RPG layer just makes it something you'll actually want to open."],
+          ["Do you connect to my bank account?", "No. Debt Slayer never asks for bank logins or account numbers. You enter your balances yourself and log payments manually after you make them. That keeps things simple and keeps your sensitive financial credentials entirely out of our hands."],
+          ["What do I get for free?", "Plenty: track up to 2 debts as bosses, full battle mechanics, 5 AI advisor counsels, seasons, streaks, and achievements. The $4.99/mo Slayer's Guild adds unlimited bosses, the Battle Planner (avalanche/snowball payoff strategy), and unlimited AI counsel."],
+          ["Is the financial advice trustworthy?", "The Battle Planner uses standard, well-established payoff math (the avalanche and snowball methods). The AI advisors give general guidance for motivation and strategy. None of it is personalized professional financial advice — projections are estimates, and for big decisions you should consult a qualified advisor."],
+          ["Can I cancel anytime?", "Yes. You can cancel your subscription whenever you like and you'll keep premium access until the end of your current billing period. No cancellation fees, no hoops."],
+          ["What happens to my data if I cancel?", "Nothing disappears. Your bosses, progress, and history stay in your account. You simply return to the free tier limits until you resubscribe."],
+        ].map(([q, a]) => (
+          <details key={q} style={landing.faqItem}>
+            <summary style={landing.faqQ}>{q}</summary>
+            <p style={landing.faqA}>{a}</p>
+          </details>
+        ))}
+      </div>
+
       {/* PRICING */}
       <div style={landing.pricing} className="fade-in">
         <h2 style={landing.pricingTitle}>Free to start. $4.99/mo for the full arsenal.</h2>
@@ -123,6 +218,13 @@ function LandingPage({ onEnter }) {
       </div>
 
       <footer style={landing.footer}>
+        <div style={{ marginBottom: 10 }}>
+          <button style={landing.footerLink} onClick={() => onShowPolicy("terms")}>Terms</button>
+          <span style={landing.footerDot}>·</span>
+          <button style={landing.footerLink} onClick={() => onShowPolicy("privacy")}>Privacy</button>
+          <span style={landing.footerDot}>·</span>
+          <button style={landing.footerLink} onClick={() => onShowPolicy("refunds")}>Cancellation & Refunds</button>
+        </div>
         Debt Slayer · a dark fantasy money RPG
         <br />Payoff projections are estimates only — not financial advice.
       </footer>
@@ -134,7 +236,7 @@ const landing = {
   page: { fontFamily: "'EB Garamond',serif", background: "radial-gradient(ellipse at top,#1a1218 0%,#0a0608 55%,#050304 100%)", minHeight: "100vh", color: "#e8e0d4", overflowX: "hidden" },
   hero: { textAlign: "center", padding: "80px 24px 50px", maxWidth: 700, margin: "0 auto" },
   heroMark: { fontSize: 64, color: GOLD, textShadow: `0 0 32px ${EMBER}` },
-  heroTitle: { fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 46, letterSpacing: 6, color: GOLD, margin: "10px 0 4px" },
+  heroTitle: { fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 46, letterSpacing: 6, color: GOLD, margin: "10px 0 4px", lineHeight: 1.15, padding: "4px 0" },
   heroTag: { fontFamily: "'Cinzel',serif", fontSize: 26, color: "#e8e0d4", lineHeight: 1.3, margin: "18px 0 14px" },
   heroSub: { color: "#b8ac98", fontSize: 17, lineHeight: 1.7, maxWidth: 540, margin: "0 auto 30px" },
   cta: { fontFamily: "'Cinzel',serif", background: `linear-gradient(135deg,${BLOOD},${EMBER})`, color: "#fff", border: "none", padding: "18px 36px", borderRadius: 6, fontWeight: 700, fontSize: 16, cursor: "pointer", letterSpacing: 2, boxShadow: `0 6px 32px ${BLOOD}aa` },
@@ -147,6 +249,13 @@ const landing = {
   pricingTitle: { fontFamily: "'Cinzel',serif", fontSize: 22, color: "#e8e0d4", margin: "0 0 12px" },
   pricingText: { color: "#9a8f80", fontSize: 15, lineHeight: 1.7, margin: "0 0 24px" },
   footer: { textAlign: "center", padding: "40px 20px 30px", color: "#5a5048", fontSize: 12, fontStyle: "italic", lineHeight: 1.8 },
+  footerLink: { background: "none", border: "none", color: "#9a8f80", cursor: "pointer", fontSize: 12, textDecoration: "underline", fontFamily: "'EB Garamond',serif" },
+  footerDot: { color: "#5a5048", margin: "0 8px" },
+  faqWrap: { maxWidth: 720, margin: "50px auto", padding: "0 24px" },
+  faqTitle: { fontFamily: "'Cinzel',serif", fontSize: 26, color: "#e8e0d4", textAlign: "center", margin: "0 0 24px" },
+  faqItem: { background: "linear-gradient(160deg,#1a141a,#0e0a0e)", border: "1px solid #2a2228", borderRadius: 8, padding: "16px 20px", marginBottom: 12 },
+  faqQ: { fontFamily: "'Cinzel',serif", fontSize: 16, color: GOLD, cursor: "pointer", listStyle: "none" },
+  faqA: { color: "#b8ac98", fontSize: 14.5, lineHeight: 1.7, margin: "12px 0 0" },
 };
 
 // ============================================================
@@ -253,18 +362,20 @@ export default function DebtSlayer() {
   }, []);
 
   const [showAuth, setShowAuth] = useState(false);
+  const [policy, setPolicy] = useState(null);
 
   if (authLoading) return <div style={{ background: "#050304", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: GOLD, fontFamily: "serif", fontSize: 22 }}>⚔ Loading the Realm...</div>;
+  if (policy) return <PolicyPage which={policy} onBack={() => setPolicy(null)} />;
   if (!user) return showAuth
     ? <AuthScreen onAuth={setUser} onBack={() => setShowAuth(false)} />
-    : <LandingPage onEnter={() => setShowAuth(true)} />;
-  return <GameApp user={user} />;
+    : <LandingPage onEnter={() => setShowAuth(true)} onShowPolicy={setPolicy} />;
+  return <GameApp user={user} onShowPolicy={setPolicy} />;
 }
 
 // ============================================================
 // GAME (shown when logged in)
 // ============================================================
-function GameApp({ user }) {
+function GameApp({ user, onShowPolicy }) {
   const [view, setView]               = useState("arena");
   const [strategy, setStrategy]       = useState("avalanche");
   const [extraBudget, setExtraBudget] = useState(200);
@@ -663,7 +774,7 @@ function GameApp({ user }) {
             ? <button style={styles.crownBtn} onClick={() => setView("paywall")}>👑 GO PREMIUM</button>
             : <span style={styles.premiumBadge}>👑 SLAYER'S GUILD</span>
           }
-          <button style={styles.signOutBtn} onClick={handleSignOut} title="Sign out">↩</button>
+          <button style={styles.signOutBtn} onClick={() => setView("settings")} title="Settings">⚙</button>
         </div>
       </header>
 
@@ -936,6 +1047,51 @@ function GameApp({ user }) {
           );
         })()}
 
+        {/* SETTINGS */}
+        {view === "settings" && (
+          <div className="fade-in" style={{ maxWidth: 620, margin: "0 auto" }}>
+            <h2 style={styles.sectionTitle}>⚙ Settings</h2>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>ACCOUNT</p>
+              <div style={styles.setRow}><span>Signed in as</span><b>{user.email || "Slayer"}</b></div>
+              <div style={styles.setRow}><span>Membership</span><b style={{ color: isPremium ? GOLD : "#9a8f80" }}>{isPremium ? "👑 Slayer's Guild" : "Free Slayer"}</b></div>
+            </div>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>MEMBERSHIP</p>
+              {isPremium ? (
+                <>
+                  <p style={styles.setText}>You're a member of the Slayer's Guild — unlimited bosses, the Battle Planner, and unlimited AI counsel are yours.</p>
+                  <button style={styles.setDangerBtn} onClick={() => alert("Once Stripe is connected, this opens the billing portal where you can cancel or update payment. You'll keep premium until the end of your billing period.")}>Manage / Cancel Subscription</button>
+                  <p style={styles.setHint}>Cancel anytime. You keep access until your billing period ends.</p>
+                </>
+              ) : (
+                <>
+                  <p style={styles.setText}>You're on the free tier: 2 bosses, 5 AI counsels. Upgrade for the full arsenal.</p>
+                  <button style={styles.crownBtn} onClick={() => setView("paywall")}>👑 Upgrade to Slayer's Guild — $4.99/mo</button>
+                </>
+              )}
+            </div>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>LEGAL</p>
+              <div style={styles.setLinks}>
+                <button style={styles.inlineLink} onClick={() => onShowPolicy("terms")}>Terms of Service</button>
+                <button style={styles.inlineLink} onClick={() => onShowPolicy("privacy")}>Privacy Policy</button>
+                <button style={styles.inlineLink} onClick={() => onShowPolicy("refunds")}>Cancellation & Refunds</button>
+              </div>
+            </div>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>SESSION</p>
+              <button style={styles.setDangerBtn} onClick={handleSignOut}>↩ Sign Out</button>
+            </div>
+
+            <button style={styles.backBtn} onClick={() => setView("arena")}>← Back to the Arena</button>
+          </div>
+        )}
+
         {/* PAYWALL */}
         {view === "paywall" && (
           <div className="fade-in" style={styles.paywall}>
@@ -989,6 +1145,10 @@ function GameApp({ user }) {
 
       <footer style={styles.footer}>
         Debt Slayer · a dark fantasy money RPG · signed in as {user.email || "Slayer"}
+        <br />
+        <button style={styles.inlineLink} onClick={() => onShowPolicy("terms")}>Terms</button> ·{" "}
+        <button style={styles.inlineLink} onClick={() => onShowPolicy("privacy")}>Privacy</button> ·{" "}
+        <button style={styles.inlineLink} onClick={() => onShowPolicy("refunds")}>Cancellation</button>
         <br />Payoff projections are estimates only — not financial advice.
         <button style={{ ...styles.inlineLink, marginLeft: 12 }} onClick={handleSignOut}>sign out</button>
       </footer>
@@ -1412,6 +1572,13 @@ const styles = {
   logRow: { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid #1a141a", fontSize:14, color:"#c8bca8", gap:10, flexWrap:"wrap" },
   logDate: { fontSize:12, color:"#7a7060" },
   shareBtn: { fontFamily:"'Cinzel',serif", background:"transparent", color:GOLD, border:`2px solid ${GOLD}`, padding:"12px 24px", borderRadius:6, fontWeight:700, fontSize:14, cursor:"pointer", letterSpacing:1 },
+  setCard: { background:"linear-gradient(160deg,#1a141a,#0e0a0e)", border:"1px solid #2a2228", borderRadius:10, padding:"20px 24px", marginBottom:16 },
+  setLabel: { fontSize:11, letterSpacing:2, color:"#7a7060", margin:"0 0 14px" },
+  setRow: { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid #1a141a", fontSize:15, color:"#c8bca8" },
+  setText: { color:"#b8ac98", fontSize:14.5, lineHeight:1.6, margin:"0 0 16px" },
+  setHint: { color:"#7a7060", fontSize:13, fontStyle:"italic", margin:"10px 0 0" },
+  setDangerBtn: { fontFamily:"'Cinzel',serif", background:"transparent", color:"#c87a5a", border:"1px solid #5a3028", padding:"12px 20px", borderRadius:6, cursor:"pointer", fontSize:14, letterSpacing:1 },
+  setLinks: { display:"flex", flexDirection:"column", gap:12, alignItems:"flex-start" },
 };
 
 const authStyles = {
