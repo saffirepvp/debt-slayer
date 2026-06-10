@@ -24,11 +24,19 @@ const ADVISORS = [
   { id: "knight", name: "Ser Castellan",     sigil: "⚔️", style: "disciplined & blunt", blurb: "Tolerates no wasted gold" },
 ];
 
-const STARTER_BOSSES = [
-  { id: 1, type: "credit",  name: "Visa Wyrm",          total: 4200,  remaining: 2850,  apr: 22.9, minPayment: 95  },
-  { id: 2, type: "student", name: "The Sallie Specter",  total: 18000, remaining: 14200, apr: 6.8,  minPayment: 210 },
-  { id: 3, type: "car",     name: "Civic Revenant",      total: 12000, remaining: 5400,  apr: 4.5,  minPayment: 290 },
-];
+// Fantasy name suggestions per debt type — used by the Summon flow
+const BOSS_NAME_POOLS = {
+  credit:   ["The Crimson Usurer", "Plastic Devourer", "The Revolving Wyrm", "Mastercard Manticore", "The Minimum Fiend"],
+  student:  ["The Sallie Specter", "Loanlich the Learned", "The Tuition Titan", "Scholar's Bane", "The Diploma Drake"],
+  car:      ["The Iron Revenant", "Wheelbound Wraith", "The Odometer Ogre", "Chrome Chimera", "The Lease Leviathan"],
+  mortgage: ["The Stone Colossus", "Castle Keeper's Curse", "The Thirty-Year Tyrant", "Foundation Fiend", "The Escrow Wyrm"],
+  medical:  ["The Plague Doctor", "Bonesetter's Bill", "The Copay Wraith", "Deductible Demon", "The ER Phantom"],
+  personal: ["The Whispering Debt", "Shade of Borrowed Gold", "The IOU Imp", "Favor's Phantom", "The Handshake Haunt"],
+};
+function randomBossName(type) {
+  const pool = BOSS_NAME_POOLS[type] || BOSS_NAME_POOLS.personal;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 const ACHIEVEMENTS = [
   { id: "first_blood",     name: "First Blood",      sigil: "🩸", desc: "Land your first strike",          check: (s) => s.totalStrikes >= 1     },
@@ -170,7 +178,9 @@ function GameApp({ user }) {
   const [view, setView]               = useState("arena");
   const [strategy, setStrategy]       = useState("avalanche");
   const [extraBudget, setExtraBudget] = useState(200);
-  const [bosses, setBosses]           = useState(STARTER_BOSSES);
+  const [bosses, setBosses]           = useState([]);
+  const [bossesLoading, setBossesLoading] = useState(true);
+  const [showSummon, setShowSummon]   = useState(false);
   const [activeBoss, setActiveBoss]   = useState(null);
   const [payAmount, setPayAmount]     = useState("");
   const [hitFlash, setHitFlash]       = useState(false);
@@ -180,7 +190,7 @@ function GameApp({ user }) {
   const [chatInput, setChatInput]     = useState("");
   const [thinking, setThinking]       = useState(false);
   const [isPremium, setIsPremium]     = useState(false);
-  const [xp, setXp]                   = useState(340);
+  const [xp, setXp]                   = useState(0);
   const chatEndRef = useRef(null);
 
   const [combo, setCombo]             = useState(0);
@@ -190,9 +200,9 @@ function GameApp({ user }) {
   const [embers, setEmbers]           = useState([]);
   const comboTimer = useRef(null);
 
-  const [stats, setStats] = useState({ totalStrikes: 0, totalDamage: 0, bossesSlain: 0, biggestSlain: 0, seasonsWon: 0, streak: 2 });
+  const [stats, setStats] = useState({ totalStrikes: 0, totalDamage: 0, bossesSlain: 0, biggestSlain: 0, seasonsWon: 0, streak: 0 });
   const [unlocked, setUnlocked]       = useState([]);
-  const [seasonDamage, setSeasonDamage] = useState(450);
+  const [seasonDamage, setSeasonDamage] = useState(0);
   const [toast, setToast]             = useState(null);
   const season = currentSeason();
 
@@ -202,6 +212,48 @@ function GameApp({ user }) {
   const level        = Math.floor(xp / 100) + 1;
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chat, thinking]);
+
+  // --- Load this user's bosses from Supabase on login ---
+  useEffect(() => {
+    async function loadBosses() {
+      const { data, error } = await supabase
+        .from("bosses")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (!error && data) {
+        setBosses(data.map((b) => ({
+          id: b.id, type: b.type, name: b.name,
+          total: Number(b.total), remaining: Number(b.remaining),
+          apr: Number(b.apr), minPayment: Number(b.min_payment),
+        })));
+      }
+      setBossesLoading(false);
+    }
+    loadBosses();
+  }, [user.id]);
+
+  // --- Summon (create) a new boss and save to Supabase ---
+  async function summonBoss({ name, type, total, apr, minPayment }) {
+    const { data, error } = await supabase
+      .from("bosses")
+      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment })
+      .select()
+      .single();
+    if (error) { alert("The summoning failed: " + error.message); return; }
+    setBosses((prev) => [...prev, {
+      id: data.id, type: data.type, name: data.name,
+      total: Number(data.total), remaining: Number(data.remaining),
+      apr: Number(data.apr), minPayment: Number(data.min_payment),
+    }]);
+    setShowSummon(false);
+    playSound("achievement");
+  }
+
+  // --- Persist damage to Supabase (fire and forget) ---
+  function saveBossRemaining(bossId, newRemaining) {
+    supabase.from("bosses").update({ remaining: newRemaining }).eq("id", bossId)
+      .then(({ error }) => { if (error) console.error("Save failed:", error.message); });
+  }
 
   useEffect(() => {
     const ctx = { ...stats, level };
@@ -264,8 +316,10 @@ function GameApp({ user }) {
 
   function dealDamage(boss, amount, isCrit) {
     const dmg = Math.min(amount, boss.remaining);
-    const nowDead = boss.remaining > 0 && boss.remaining - dmg <= 0;
-    setBosses((prev) => prev.map((b) => b.id === boss.id ? { ...b, remaining: Math.max(0, b.remaining - dmg) } : b));
+    const newRemaining = Math.max(0, boss.remaining - dmg);
+    const nowDead = boss.remaining > 0 && newRemaining <= 0;
+    setBosses((prev) => prev.map((b) => b.id === boss.id ? { ...b, remaining: newRemaining } : b));
+    saveBossRemaining(boss.id, newRemaining);
     setXp((x) => x + Math.floor(dmg / 10) * (isCrit ? 2 : 1));
     setStats((s) => ({ ...s, totalStrikes: s.totalStrikes + 1, totalDamage: s.totalDamage + dmg, bossesSlain: s.bossesSlain + (nowDead ? 1 : 0), biggestSlain: nowDead ? Math.max(s.biggestSlain, boss.total) : s.biggestSlain }));
     setSeasonDamage((d) => d + dmg);
@@ -354,35 +408,63 @@ function GameApp({ user }) {
         {/* ARENA */}
         {view === "arena" && (
           <div className="fade-in">
-            <div style={styles.realmBanner}>
-              <p style={styles.realmLabel}>TOTAL CURSE UPON THE REALM</p>
-              <p style={styles.realmTotal}>${totalDebt.toLocaleString()}</p>
-              <div style={styles.realmBarOuter}><div style={{ ...styles.realmBarInner, width: `${((totalOriginal - totalDebt) / totalOriginal) * 100}%` }} /></div>
-              <p style={styles.realmFreed}>{Math.round(((totalOriginal - totalDebt) / totalOriginal) * 100)}% of the realm freed</p>
-            </div>
-            <h2 style={styles.sectionTitle}>⚔ Bosses of the Realm</h2>
-            <div style={styles.bossGrid}>
-              {bosses.map((b, idx) => {
-                const meta = BOSS_TYPES[b.type];
-                const hp = (b.remaining / b.total) * 100;
-                const dead = b.remaining <= 0;
-                const locked = !isPremium && idx > 0;
-                return (
-                  <div key={b.id} className="boss-card" style={{ ...styles.bossCard, borderColor: dead ? GOLD : meta.color, opacity: dead ? 0.65 : 1 }}
-                    onClick={() => { if (locked) return setView("paywall"); setActiveBoss(b); setView("boss"); }}>
-                    {locked && <div style={styles.bossLockOverlay}><span style={{ fontSize: 30 }}>🔒</span><span style={styles.bossLockText}>Slayer's Guild</span></div>}
-                    <div style={{ ...styles.bossSigil, background: `radial-gradient(circle, ${meta.color}55, transparent)`, filter: locked ? "blur(3px)" : "none" }}>
-                      <span style={{ fontSize: 40, filter: dead ? "grayscale(1)" : "none" }}>{meta.sigil}</span>
-                    </div>
-                    <div style={{ ...styles.bossName, filter: locked ? "blur(4px)" : "none" }}>{b.name}</div>
-                    <div style={styles.bossTitle}>{dead ? "💀 SLAIN" : meta.title}</div>
-                    <div style={styles.hpOuter}><div style={{ ...styles.hpInner, width: `${hp}%`, background: dead ? GOLD : `linear-gradient(90deg, ${BLOOD}, ${EMBER})` }} /></div>
-                    <div style={styles.hpText}>{dead ? "Vanquished" : `$${b.remaining.toLocaleString()} HP`} · {b.apr}% APR</div>
-                  </div>
-                );
-              })}
-            </div>
-            {!isPremium && <p style={styles.freeTierNote}>Free Slayers track 1 boss. <button style={styles.inlineLink} onClick={() => setView("paywall")}>Join the Guild</button> to battle them all.</p>}
+            {bossesLoading ? (
+              <p style={{ textAlign: "center", color: "#9a8f80", fontStyle: "italic", marginTop: 60 }}>⚔ Scouting the realm...</p>
+            ) : bosses.length === 0 ? (
+              <div style={styles.emptyRealm}>
+                <div style={styles.emptySigil}>🏰</div>
+                <h2 style={styles.emptyTitle}>The Realm Awaits Its Slayer</h2>
+                <p style={styles.emptyText}>
+                  Every debt you owe is a monster with a name, a hoard, and a weakness.
+                  Summon your first boss — give your real debt a face — and begin the hunt.
+                </p>
+                <button style={styles.summonBtn} onClick={() => setShowSummon(true)}>
+                  🔥 SUMMON YOUR FIRST BOSS
+                </button>
+                <p style={styles.emptyHint}>A credit card, a student loan, a car note... name your foe.</p>
+              </div>
+            ) : (
+              <>
+                <div style={styles.realmBanner}>
+                  <p style={styles.realmLabel}>TOTAL CURSE UPON THE REALM</p>
+                  <p style={styles.realmTotal}>${totalDebt.toLocaleString()}</p>
+                  <div style={styles.realmBarOuter}><div style={{ ...styles.realmBarInner, width: `${totalOriginal > 0 ? ((totalOriginal - totalDebt) / totalOriginal) * 100 : 0}%` }} /></div>
+                  <p style={styles.realmFreed}>{totalOriginal > 0 ? Math.round(((totalOriginal - totalDebt) / totalOriginal) * 100) : 0}% of the realm freed</p>
+                </div>
+                <div style={styles.arenaTopRow}>
+                  <h2 style={{ ...styles.sectionTitle, marginBottom: 0 }}>⚔ Bosses of the Realm</h2>
+                  <button
+                    style={styles.summonSmallBtn}
+                    onClick={() => {
+                      if (!isPremium && bosses.length >= 1) return setView("paywall");
+                      setShowSummon(true);
+                    }}
+                  >
+                    + Summon Boss
+                  </button>
+                </div>
+                <div style={styles.bossGrid}>
+                  {bosses.map((b) => {
+                    const meta = BOSS_TYPES[b.type];
+                    const hp = (b.remaining / b.total) * 100;
+                    const dead = b.remaining <= 0;
+                    return (
+                      <div key={b.id} className="boss-card" style={{ ...styles.bossCard, borderColor: dead ? GOLD : meta.color, opacity: dead ? 0.65 : 1 }}
+                        onClick={() => { setActiveBoss(b); setView("boss"); }}>
+                        <div style={{ ...styles.bossSigil, background: `radial-gradient(circle, ${meta.color}55, transparent)` }}>
+                          <span style={{ fontSize: 40, filter: dead ? "grayscale(1)" : "none" }}>{meta.sigil}</span>
+                        </div>
+                        <div style={styles.bossName}>{b.name}</div>
+                        <div style={styles.bossTitle}>{dead ? "💀 SLAIN" : meta.title}</div>
+                        <div style={styles.hpOuter}><div style={{ ...styles.hpInner, width: `${hp}%`, background: dead ? GOLD : `linear-gradient(90deg, ${BLOOD}, ${EMBER})` }} /></div>
+                        <div style={styles.hpText}>{dead ? "Vanquished" : `$${b.remaining.toLocaleString()} HP`} · {b.apr}% APR</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!isPremium && bosses.length >= 1 && <p style={styles.freeTierNote}>Free Slayers track 1 boss. <button style={styles.inlineLink} onClick={() => setView("paywall")}>Join the Guild</button> to summon them all.</p>}
+              </>
+            )}
           </div>
         )}
 
@@ -579,6 +661,9 @@ function GameApp({ user }) {
         )}
       </main>
 
+      {/* SUMMON BOSS MODAL */}
+      {showSummon && <SummonModal onSummon={summonBoss} onClose={() => setShowSummon(false)} />}
+
       {/* VICTORY OVERLAY */}
       {victoryBoss && (() => {
         const meta = BOSS_TYPES[victoryBoss.type];
@@ -615,6 +700,108 @@ function GameApp({ user }) {
 
 function Stat({ label, value }) {
   return <div style={styles.stat}><span style={styles.statValue}>{value}</span><span style={styles.statLabel}>{label}</span></div>;
+}
+
+// ============================================================
+// SUMMON BOSS MODAL — turn a real debt into a monster
+// ============================================================
+function SummonModal({ onSummon, onClose }) {
+  const [step, setStep]       = useState(1);
+  const [type, setType]       = useState(null);
+  const [name, setName]       = useState("");
+  const [total, setTotal]     = useState("");
+  const [apr, setApr]         = useState("");
+  const [minPayment, setMinPayment] = useState("");
+  const [summoning, setSummoning]   = useState(false);
+
+  function pickType(t) {
+    setType(t);
+    setName(randomBossName(t));
+    setStep(2);
+  }
+
+  function rerollName() { setName(randomBossName(type)); }
+
+  async function handleSummon() {
+    const t = parseFloat(total);
+    if (!name.trim() || !t || t <= 0) return;
+    setSummoning(true);
+    await onSummon({
+      name: name.trim(),
+      type,
+      total: t,
+      apr: parseFloat(apr) || 0,
+      minPayment: parseFloat(minPayment) || 0,
+    });
+    setSummoning(false);
+  }
+
+  const meta = type ? BOSS_TYPES[type] : null;
+
+  return (
+    <div style={styles.summonOverlay} onClick={onClose}>
+      <div className="victory-burst" style={styles.summonCard} onClick={(e) => e.stopPropagation()}>
+        <button style={styles.summonClose} onClick={onClose}>✕</button>
+
+        {step === 1 && (
+          <>
+            <h2 style={styles.summonTitle}>🔥 Summon a Boss</h2>
+            <p style={styles.summonSub}>What manner of debt haunts you, Slayer?</p>
+            <div style={styles.typeGrid}>
+              {Object.entries(BOSS_TYPES).map(([key, t]) => (
+                <button key={key} style={styles.typeCard} onClick={() => pickType(key)} className="boss-card">
+                  <span style={{ fontSize: 36 }}>{t.sigil}</span>
+                  <span style={styles.typeName}>{key === "credit" ? "Credit Card" : key === "student" ? "Student Loan" : key === "car" ? "Car Loan" : key === "mortgage" ? "Mortgage" : key === "medical" ? "Medical Debt" : "Personal Loan"}</span>
+                  <span style={styles.typeTitle}>{t.title}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 2 && meta && (
+          <>
+            <button style={styles.summonBack} onClick={() => setStep(1)}>← choose another foe</button>
+            <div style={{ textAlign: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: 64, filter: `drop-shadow(0 0 20px ${meta.color})` }}>{meta.sigil}</span>
+            </div>
+            <h2 style={{ ...styles.summonTitle, marginTop: 0 }}>Name Your Foe</h2>
+
+            <label style={styles.summonLabel}>BOSS NAME</label>
+            <div style={styles.nameRow}>
+              <input style={{ ...styles.summonInput, marginBottom: 0, flex: 1 }} value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
+              <button style={styles.rerollBtn} onClick={rerollName} title="Roll a new name">🎲</button>
+            </div>
+
+            <label style={styles.summonLabel}>HOW MUCH DO YOU OWE? (the boss's HP)</label>
+            <div style={styles.moneyRow}>
+              <span style={styles.dollarSign}>$</span>
+              <input style={{ ...styles.summonInput, marginBottom: 0, border: "none", background: "transparent" }} type="number" placeholder="5,000" value={total} onChange={(e) => setTotal(e.target.value)} />
+            </div>
+
+            <div style={styles.summonTwoCol}>
+              <div style={{ flex: 1 }}>
+                <label style={styles.summonLabel}>APR % <span style={styles.optionalTag}>(its regeneration)</span></label>
+                <input style={styles.summonInput} type="number" placeholder="22.9" value={apr} onChange={(e) => setApr(e.target.value)} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={styles.summonLabel}>MIN PAYMENT <span style={styles.optionalTag}>(optional)</span></label>
+                <input style={styles.summonInput} type="number" placeholder="95" value={minPayment} onChange={(e) => setMinPayment(e.target.value)} />
+              </div>
+            </div>
+
+            <button
+              style={{ ...styles.summonBtn, width: "100%", opacity: !name.trim() || !parseFloat(total) ? 0.5 : 1 }}
+              onClick={handleSummon}
+              disabled={summoning || !name.trim() || !parseFloat(total)}
+            >
+              {summoning ? "Summoning..." : "⚔ SUMMON & BEGIN THE HUNT"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 function PlanStat({ label, value, big, gold }) {
   return (
@@ -812,6 +999,32 @@ const styles = {
   toastTitle: { margin:0, fontSize:11, letterSpacing:2, color:GOLD },
   toastName: { margin:"2px 0", fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:16, color:"#e8e0d4" },
   toastDesc: { margin:0, fontSize:13, color:"#9a8f80" },
+  // empty realm + summon
+  emptyRealm: { textAlign:"center", maxWidth:520, margin:"60px auto", background:"linear-gradient(160deg,#1c1016,#0a0608)", border:`1px solid ${GOLD}33`, borderRadius:14, padding:"50px 36px" },
+  emptySigil: { fontSize:64, filter:`drop-shadow(0 0 24px ${EMBER}66)` },
+  emptyTitle: { fontFamily:"'Cinzel',serif", fontSize:26, color:GOLD, letterSpacing:1, margin:"16px 0 10px" },
+  emptyText: { color:"#c8bca8", lineHeight:1.7, fontSize:16, margin:"0 0 26px" },
+  emptyHint: { color:"#7a7060", fontStyle:"italic", fontSize:13, marginTop:16 },
+  summonBtn: { fontFamily:"'Cinzel',serif", background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", border:"none", padding:"16px 28px", borderRadius:6, fontWeight:700, fontSize:15, cursor:"pointer", letterSpacing:1, boxShadow:`0 4px 24px ${BLOOD}88` },
+  summonSmallBtn: { fontFamily:"'Cinzel',serif", background:"transparent", color:GOLD, border:`1px solid ${GOLD}`, padding:"8px 16px", borderRadius:4, cursor:"pointer", letterSpacing:1, fontSize:13 },
+  arenaTopRow: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, flexWrap:"wrap", gap:12 },
+  summonOverlay: { position:"fixed", inset:0, background:"rgba(4,2,6,.88)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:110, backdropFilter:"blur(4px)", padding:16 },
+  summonCard: { position:"relative", width:"100%", maxWidth:520, maxHeight:"90vh", overflowY:"auto", background:"linear-gradient(160deg,#1c1016,#0a0608)", border:`1px solid ${GOLD}55`, borderRadius:14, padding:"36px 32px" },
+  summonClose: { position:"absolute", top:14, right:16, background:"none", border:"none", color:"#7a7060", fontSize:18, cursor:"pointer" },
+  summonTitle: { fontFamily:"'Cinzel',serif", fontSize:24, color:GOLD, letterSpacing:1, textAlign:"center", margin:"0 0 6px" },
+  summonSub: { color:"#9a8f80", fontStyle:"italic", textAlign:"center", margin:"0 0 24px" },
+  summonBack: { background:"none", border:"none", color:"#9a8f80", cursor:"pointer", fontSize:13, fontStyle:"italic", marginBottom:10, padding:0 },
+  typeGrid: { display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:12 },
+  typeCard: { display:"flex", flexDirection:"column", alignItems:"center", gap:6, background:"linear-gradient(160deg,#1a141a,#0e0a0e)", border:"2px solid #3a3038", borderRadius:10, padding:"18px 10px", cursor:"pointer", color:"#e8e0d4" },
+  typeName: { fontFamily:"'Cinzel',serif", fontWeight:700, fontSize:13 },
+  typeTitle: { fontSize:11, fontStyle:"italic", color:"#9a8f80" },
+  summonLabel: { display:"block", fontSize:11, letterSpacing:2, color:"#9a8f80", margin:"18px 0 6px", textAlign:"left" },
+  optionalTag: { color:"#5a5048", letterSpacing:0, textTransform:"none" },
+  summonInput: { width:"100%", display:"block", background:"#0a0608", border:"1px solid #3a3038", color:"#e8e0d4", padding:"12px 14px", borderRadius:6, fontSize:16, fontFamily:"'Cinzel',serif", marginBottom:4 },
+  nameRow: { display:"flex", gap:8, alignItems:"center" },
+  rerollBtn: { background:"#0a0608", border:`1px solid ${GOLD}55`, borderRadius:6, fontSize:20, padding:"10px 14px", cursor:"pointer" },
+  moneyRow: { display:"flex", alignItems:"center", gap:4, background:"#0a0608", border:`1px solid ${GOLD}55`, borderRadius:6, padding:"2px 12px" },
+  summonTwoCol: { display:"flex", gap:14 },
 };
 
 const authStyles = {
@@ -828,4 +1041,3 @@ const authStyles = {
   error: { color:"#ff6b35", fontSize:13, margin:"4px 0 8px" },
   success: { color:GOLD, fontSize:13, margin:"4px 0 8px" },
 };
- 
