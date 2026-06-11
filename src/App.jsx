@@ -62,6 +62,15 @@ const SEASON_KEY = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
 const FREE_BOSS_LIMIT = 2;
 const FREE_COUNSEL_LIMIT = 5;
 const SKIN_COSTS = { blood: 0, ash: 50, spectral: 100, gilded: 250, void: 400 }; // avatar skin shop (coins)
+
+function daysUntilDue(dueDay) {
+  const now = new Date();
+  const today = now.getDate();
+  const d = Math.min(dueDay, 28);
+  let due = new Date(now.getFullYear(), now.getMonth(), d);
+  if (today > d) due = new Date(now.getFullYear(), now.getMonth() + 1, d);
+  return Math.round((due - new Date(now.getFullYear(), now.getMonth(), today)) / 86400000);
+}
 const STREAK_RANKS = ["Squire", "Knight", "Champion", "Warlord", "Legend"];
 function daysLeftInMonth() {
   const now = new Date();
@@ -75,7 +84,7 @@ function daysLeftInMonth() {
 const POLICY_CONTENT = {
   terms: {
     title: "Terms of Service",
-    updated: "Last updated: this is a starter template — have a professional review before launch.",
+    updated: "Last updated: June 2026",
     sections: [
       ["Acceptance", "By creating an account or using Debt Slayer, you agree to these terms. If you don't agree, please don't use the service."],
       ["What Debt Slayer is", "Debt Slayer is a gamified debt-tracking tool. You manually enter your debts and log payments. We display balances, projections, and educational strategy content in a role-playing-game format. It is a tracking and motivation tool, not a bank, lender, or licensed financial advisor."],
@@ -88,7 +97,7 @@ const POLICY_CONTENT = {
   },
   privacy: {
     title: "Privacy Policy",
-    updated: "Last updated: this is a starter template — have a professional review before launch.",
+    updated: "Last updated: June 2026",
     sections: [
       ["What we collect", "Your email address (for login), the debt information you choose to enter (names, balances, APRs, payments), and your in-app progress (XP, streaks, achievements). We do NOT collect or store bank credentials or account numbers."],
       ["How we use it", "To run the service: to show your bosses, save your progress, calculate projections, and power the AI advisor responses. We don't sell your personal data."],
@@ -100,7 +109,7 @@ const POLICY_CONTENT = {
   },
   refunds: {
     title: "Cancellation & Refunds",
-    updated: "Last updated: this is a starter template — have a professional review before launch.",
+    updated: "Last updated: June 2026",
     sections: [
       ["Cancel anytime", "You can cancel the Slayer's Guild subscription at any time from your Settings page or through the payment processor's portal. There are no cancellation fees."],
       ["What happens when you cancel", "You keep premium access until the end of the billing period you've already paid for. After that, your account returns to the free tier. Your data — bosses, progress, history — is preserved."],
@@ -384,8 +393,10 @@ function GameApp({ user, onShowPolicy }) {
   const [confirmBanish, setConfirmBanish] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [battleLog, setBattleLog]     = useState([]);
+  const [allPayments, setAllPayments] = useState([]);
   const [activeBoss, setActiveBoss]   = useState(null);
   const [payAmount, setPayAmount]     = useState("");
+  const [feedAmount, setFeedAmount]   = useState("");
   const [hitFlash, setHitFlash]       = useState(false);
   const [floatingDmg, setFloatingDmg] = useState([]);
   const [advisor, setAdvisor]         = useState(ADVISORS[0]);
@@ -462,6 +473,7 @@ function GameApp({ user, onShowPolicy }) {
             apr, minPayment: Number(b.min_payment),
             accountLabel: b.account_label || "",
             skin: b.skin || "blood",
+            dueDay: b.due_day || null,
           };
         });
         setBosses(loaded);
@@ -473,6 +485,13 @@ function GameApp({ user, onShowPolicy }) {
       setBossesLoading(false);
     }
     loadBosses();
+  }, [user.id]);
+
+  // --- Full payment history (for the payoff chart) ---
+  useEffect(() => {
+    supabase.from("payments").select("amount, created_at")
+      .order("created_at", { ascending: true }).limit(1000)
+      .then(({ data }) => { if (data) setAllPayments(data); });
   }, [user.id]);
 
   // --- Load (or create) this user's profile: xp, streak, season, counsels ---
@@ -559,11 +578,11 @@ function GameApp({ user, onShowPolicy }) {
   }, [seasonDamage, profileLoaded]);
 
   // --- Summon (create) a new boss and save to Supabase ---
-  async function summonBoss({ name, type, total, apr, minPayment, accountLabel }) {
+  async function summonBoss({ name, type, total, apr, minPayment, accountLabel, dueDay }) {
     const skin = FREE_SKINS[bosses.length % FREE_SKINS.length]; // auto-rotate looks
     const { data, error } = await supabase
       .from("bosses")
-      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment, account_label: accountLabel || null, skin })
+      .insert({ user_id: user.id, name, type, total, remaining: total, apr, min_payment: minPayment, account_label: accountLabel || null, skin, due_day: dueDay || null })
       .select()
       .single();
     if (error) { notify("The summoning failed: " + error.message); return; }
@@ -573,6 +592,7 @@ function GameApp({ user, onShowPolicy }) {
       apr: Number(data.apr), minPayment: Number(data.min_payment),
       accountLabel: data.account_label || "",
       skin: data.skin || "blood",
+      dueDay: data.due_day || null,
     };
     setBosses((prev) => [...prev, newBoss]);
     setShowSummon(false);
@@ -603,6 +623,7 @@ function GameApp({ user, onShowPolicy }) {
       apr: updated.apr, min_payment: updated.minPayment,
       account_label: updated.accountLabel || null,
       skin: updated.skin || "blood",
+      due_day: updated.dueDay || null,
     }).eq("id", updated.id);
     if (error) { notify("Update failed: " + error.message); return; }
     setBosses((prev) => prev.map((b) => b.id === updated.id ? { ...b, ...updated } : b));
@@ -928,6 +949,7 @@ function GameApp({ user, onShowPolicy }) {
       if (kind === "crit")        { make(220, 0, 0.1, "sawtooth", 0.18); make(330, 0.05, 0.15, "square", 0.14); make(140, 0, 0.25, "triangle", 0.12); }
       if (kind === "victory")     { [523, 659, 784, 1047].forEach((f, i) => make(f, i * 0.12, 0.3, "triangle", 0.14)); }
       if (kind === "achievement") { [659, 880].forEach((f, i) => make(f, i * 0.1, 0.25, "triangle", 0.13)); }
+      if (kind === "heal")        { make(170, 0, 0.22, "sine", 0.12); make(115, 0.09, 0.3, "sine", 0.1); }
     } catch (e) {}
   }
 
@@ -941,6 +963,28 @@ function GameApp({ user, onShowPolicy }) {
     const dmg = Math.min(amount, boss.remaining);
     const newRemaining = Math.max(0, boss.remaining - dmg);
     const nowDead = boss.remaining > 0 && newRemaining <= 0;
+    // milestone celebrations at 25/50/75% of the boss's power broken
+    if (!nowDead && boss.total > 0) {
+      const prevPct = ((boss.total - boss.remaining) / boss.total) * 100;
+      const newPct = ((boss.total - newRemaining) / boss.total) * 100;
+      const meta2 = BOSS_TYPES[boss.type];
+      const milestones = [
+        [75, `${boss.name} falters!`, "75% of its power broken. The end draws near."],
+        [50, `${boss.name} staggers!`, "Half its power broken. Hold the line, Slayer."],
+        [25, `${boss.name} bleeds!`, "A quarter of its power broken. First blood runs deep."],
+      ];
+      for (const [t, title, desc] of milestones) {
+        if (prevPct < t && newPct >= t) {
+          setTimeout(() => {
+            setToast({ sigil: meta2.sigil, name: title, desc });
+            playSound("achievement");
+            setTimeout(() => setToast(null), 4500);
+          }, 700);
+          break;
+        }
+      }
+    }
+    setAllPayments((p) => [...p, { amount: dmg, created_at: new Date().toISOString() }]);
     setBosses((prev) => prev.map((b) => b.id === boss.id ? { ...b, remaining: newRemaining } : b));
     saveBossRemaining(boss.id, newRemaining);
     supabase.from("payments").insert({ user_id: user.id, boss_id: boss.id, amount: dmg, was_crit: !!isCrit })
@@ -972,6 +1016,25 @@ function GameApp({ user, onShowPolicy }) {
     dealDamage(activeBoss, amt, isCrit);
     setActiveBoss((b) => ({ ...b, remaining: Math.max(0, b.remaining - Math.min(amt, b.remaining)) }));
     setPayAmount("");
+  }
+
+  // --- The beast feeds: log new spending, boss heals ---
+  function handleFeed() {
+    const amt = parseFloat(feedAmount);
+    if (!amt || amt <= 0 || !activeBoss) return;
+    const newRemaining = Math.round((activeBoss.remaining + amt) * 100) / 100;
+    setBosses((prev) => prev.map((b) => b.id === activeBoss.id ? { ...b, remaining: newRemaining } : b));
+    setActiveBoss((b) => ({ ...b, remaining: newRemaining }));
+    saveBossRemaining(activeBoss.id, newRemaining);
+    supabase.from("payments").insert({ user_id: user.id, boss_id: activeBoss.id, amount: -amt, was_crit: false })
+      .then(({ error }) => { if (error) console.error("Spend log failed:", error.message); });
+    setBattleLog((l) => [{ id: "local-" + Date.now(), amount: -amt, was_crit: false, created_at: new Date().toISOString() }, ...l]);
+    setAllPayments((p) => [...p, { amount: -amt, created_at: new Date().toISOString() }]);
+    playSound("heal");
+    const id = Date.now();
+    setFloatingDmg((f) => [...f, { id, amount: amt, heal: true }]);
+    setTimeout(() => setFloatingDmg((f) => f.filter((x) => x.id !== id)), 1300);
+    setFeedAmount("");
   }
 
   async function sendToAdvisor(userMsg) {
@@ -1060,6 +1123,27 @@ function GameApp({ user, onShowPolicy }) {
                   <div style={styles.realmBarOuter}><div style={{ ...styles.realmBarInner, width: `${totalOriginal > 0 ? ((totalOriginal - totalDebt) / totalOriginal) * 100 : 0}%` }} /></div>
                   <p style={styles.realmFreed}>{totalOriginal > 0 ? Math.round(((totalOriginal - totalDebt) / totalOriginal) * 100) : 0}% of the realm freed</p>
                 </div>
+                {(() => {
+                  const due = bosses
+                    .filter((b) => b.remaining > 0 && b.dueDay)
+                    .map((b) => ({ b, days: daysUntilDue(b.dueDay) }))
+                    .filter((d) => d.days <= 7)
+                    .sort((a, c) => a.days - c.days);
+                  if (due.length === 0) return null;
+                  return (
+                    <div style={styles.tributeBanner}>
+                      <p style={styles.tributeTitle}>⚠ TRIBUTE DEMANDS</p>
+                      {due.map(({ b, days }) => (
+                        <div key={b.id} style={styles.tributeRow} onClick={() => openBoss(b)}>
+                          <span>{BOSS_TYPES[b.type].sigil} <b>{b.name}</b>{b.minPayment > 0 ? ` demands $${b.minPayment.toLocaleString()}` : " demands tribute"}</span>
+                          <span style={{ color: days <= 2 ? EMBER : GOLD, fontFamily: "'Cinzel',serif", fontSize: 13, whiteSpace: "nowrap" }}>
+                            {days === 0 ? "DUE TODAY" : days === 1 ? "due tomorrow" : `due in ${days} days`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
                 <div style={styles.arenaTopRow}>
                   <h2 style={{ ...styles.sectionTitle, marginBottom: 0 }}>⚔ Bosses of the Realm</h2>
                   <button
@@ -1088,11 +1172,13 @@ function GameApp({ user, onShowPolicy }) {
                         <div style={styles.bossTitle}>{dead ? "💀 SLAIN" : meta.title}</div>
                         <div style={styles.hpOuter}><div style={{ ...styles.hpInner, width: `${hp}%`, background: dead ? GOLD : `linear-gradient(90deg, ${BLOOD}, ${EMBER})` }} /></div>
                         <div style={styles.hpText}>{dead ? "Vanquished" : `$${b.remaining.toLocaleString()} HP`} · {b.apr}% APR</div>
+                        {!dead && b.dueDay && <div style={styles.dueChip}>🗓 tribute due {daysUntilDue(b.dueDay) === 0 ? "TODAY" : `in ${daysUntilDue(b.dueDay)}d`}</div>}
                       </div>
                     );
                   })}
                 </div>
                 {!isPremium && bosses.length >= FREE_BOSS_LIMIT && <p style={styles.freeTierNote}>Free Slayers track {FREE_BOSS_LIMIT} bosses. <button style={styles.inlineLink} onClick={() => setView("paywall")}>Join the Guild</button> to summon them all.</p>}
+                <DebtChart payments={allPayments} currentTotal={totalDebt} />
               </>
             )}
           </div>
@@ -1124,7 +1210,7 @@ function GameApp({ user, onShowPolicy }) {
                   <div className={hitFlash ? "shake" : ""} style={styles.battleSigil}>
                     <BossArt type={activeBoss.type} skin={activeBoss.skin} size={250} dead={dead} className={dead ? "ds-battle-art" : "ds-battle-art boss-idle"} />
                     {embers.map((e) => <span key={e.id} className="ember" style={{ left: `${e.x}%`, "--angle": `${e.angle}deg`, "--dist": `${e.dist}px` }}>✦</span>)}
-                    {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.crit ? GOLD : EMBER }}>-${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
+                    {floatingDmg.map((f) => <span key={f.id} className="float-dmg" style={{ ...styles.floatDmg, fontSize: f.crit ? 42 : 28, color: f.heal ? "#5ee8c0" : f.crit ? GOLD : EMBER }}>{f.heal ? "+" : "-"}${f.amount.toLocaleString()}{f.crit ? "!" : ""}</span>)}
                   </div>
                 </div>
                 <h2 style={styles.battleName}>{activeBoss.name}</h2>
@@ -1147,7 +1233,20 @@ function GameApp({ user, onShowPolicy }) {
                     <div className="ds-quick-row" style={styles.quickRow}>
                       {[...new Set([activeBoss.minPayment, activeBoss.minPayment * 2, 500].filter((q) => q > 0))].map((q) => <button key={q} style={styles.quickBtn} onClick={() => setPayAmount(String(q))}>$ {q}</button>)}
                     </div>
+                    <div style={styles.feedBox}>
+                      <p style={styles.feedLabel}>Spent on this card or loan? Log it — the beast feeds.</p>
+                      <div className="ds-attack-row" style={styles.feedRow}>
+                        <span style={{ ...styles.dollarSign, color: "#5ee8c0" }}>$</span>
+                        <input type="number" value={feedAmount} onChange={(e) => setFeedAmount(e.target.value)} placeholder="50" style={styles.feedInput} />
+                        <button className="ds-strike-btn" style={styles.feedBtn} onClick={handleFeed}>🩸 FEED THE BEAST</button>
+                      </div>
+                    </div>
                     <p style={styles.aprWarn}>⚠ This beast regenerates ~${Math.round((activeBoss.remaining * activeBoss.apr) / 100 / 12)}/mo from {activeBoss.apr}% APR</p>
+                    {activeBoss.dueDay && (() => { const d = daysUntilDue(activeBoss.dueDay); return (
+                      <p style={{ ...styles.aprWarn, color: d <= 2 ? EMBER : "#c8a85a", marginTop: 6 }}>
+                        🗓 Tribute due on day {activeBoss.dueDay} each month — {d === 0 ? "TODAY" : `${d} day${d === 1 ? "" : "s"} away`}
+                      </p>
+                    ); })()}
                   </div>
                 )}
               </div>
@@ -1155,11 +1254,11 @@ function GameApp({ user, onShowPolicy }) {
                 <div style={styles.logBox}>
                   <div style={styles.logHeader}>
                     <span style={styles.logTitle}>📜 Battle Log</span>
-                    <span style={styles.logTotal}>Total dealt: ${battleLog.reduce((s, p) => s + Number(p.amount), 0).toLocaleString()}</span>
+                    <span style={styles.logTotal}>Total dealt: ${battleLog.reduce((s, p) => s + Math.max(0, Number(p.amount)), 0).toLocaleString()}</span>
                   </div>
                   {battleLog.slice(0, 10).map((p) => (
                     <div key={p.id} style={styles.logRow}>
-                      <span>{p.was_crit ? "💥 Critical strike" : "🗡 Strike"} · <b style={{ color: EMBER }}>${Number(p.amount).toLocaleString()}</b></span>
+                      <span>{Number(p.amount) < 0 ? <>🩸 The beast fed · <b style={{ color: "#5ee8c0" }}>+${Math.abs(Number(p.amount)).toLocaleString()}</b></> : <>{p.was_crit ? "💥 Critical strike" : "🗡 Strike"} · <b style={{ color: EMBER }}>${Number(p.amount).toLocaleString()}</b></>}</span>
                       <span style={styles.logDate}>{new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                     </div>
                   ))}
@@ -1531,6 +1630,56 @@ function GameApp({ user, onShowPolicy }) {
   );
 }
 
+// ============================================================
+// PAYOFF CHART — total debt over time, rebuilt from payment history
+// ============================================================
+function DebtChart({ payments, currentTotal }) {
+  const events = (payments || []).filter((p) => p.created_at);
+  if (events.length < 2) {
+    return (
+      <div style={styles.chartCard}>
+        <h3 style={styles.orderTitle}>📉 The Curse Over Time</h3>
+        <p style={{ ...styles.councilSub, margin: 0 }}>Strike your debts and your payoff chronicle will be drawn here.</p>
+      </div>
+    );
+  }
+  const sumAll = events.reduce((s, p) => s + Number(p.amount), 0);
+  let running = currentTotal + sumAll;
+  const pts = [{ t: new Date(events[0].created_at).getTime() - 86400000, v: Math.max(0, running) }];
+  events.forEach((p) => {
+    running -= Number(p.amount);
+    pts.push({ t: new Date(p.created_at).getTime(), v: Math.max(0, running) });
+  });
+  pts.push({ t: Date.now(), v: Math.max(0, currentTotal) });
+  const W = 600, H = 170, P = 14;
+  const tMin = pts[0].t, tMax = pts[pts.length - 1].t;
+  const vMax = Math.max(...pts.map((p) => p.v)) * 1.06 || 1;
+  const vMin = Math.min(...pts.map((p) => p.v)) * 0.9;
+  const x = (t) => P + ((t - tMin) / Math.max(1, tMax - tMin)) * (W - 2 * P);
+  const y = (v) => H - P - ((v - vMin) / Math.max(1, vMax - vMin)) * (H - 2 * P);
+  const line = pts.map((p) => `${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const area = `${P},${H - P} ${line} ${(W - P)},${H - P}`;
+  const fmt = (t) => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const slain = Math.max(0, Math.round(pts[0].v - currentTotal));
+  return (
+    <div style={styles.chartCard}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
+        <h3 style={{ ...styles.orderTitle, marginBottom: 8 }}>📉 The Curse Over Time</h3>
+        {slain > 0 && <span style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: GOLD }}>${slain.toLocaleString()} slain so far</span>}
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block" }}>
+        <polygon points={area} fill="#8b1a1a22" />
+        <polyline points={line} fill="none" stroke={EMBER} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={x(pts[pts.length - 1].t)} cy={y(pts[pts.length - 1].v)} r="4" fill={GOLD} />
+      </svg>
+      <div style={styles.chartFoot}>
+        <span>{fmt(tMin)} · ${Math.round(pts[0].v).toLocaleString()}</span>
+        <span style={{ color: GOLD }}>today · ${Math.round(currentTotal).toLocaleString()}</span>
+      </div>
+    </div>
+  );
+}
+
 function Stat({ label, value }) {
   return <div style={styles.stat}><span style={styles.statValue}>{value}</span><span style={styles.statLabel}>{label}</span></div>;
 }
@@ -1546,6 +1695,7 @@ function SummonModal({ onSummon, onClose }) {
   const [total, setTotal]     = useState("");
   const [apr, setApr]         = useState("");
   const [minPayment, setMinPayment] = useState("");
+  const [dueDay, setDueDay]         = useState("");
   const [summoning, setSummoning]   = useState(false);
 
   function pickType(t) {
@@ -1560,6 +1710,7 @@ function SummonModal({ onSummon, onClose }) {
     const t = parseFloat(total);
     if (!name.trim() || !t || t <= 0) return;
     setSummoning(true);
+    const dd = parseInt(dueDay);
     await onSummon({
       name: name.trim(),
       type,
@@ -1567,6 +1718,7 @@ function SummonModal({ onSummon, onClose }) {
       apr: parseFloat(apr) || 0,
       minPayment: parseFloat(minPayment) || 0,
       accountLabel: accountLabel.trim(),
+      dueDay: dd >= 1 && dd <= 31 ? Math.min(dd, 28) : null,
     });
     setSummoning(false);
   }
@@ -1627,6 +1779,9 @@ function SummonModal({ onSummon, onClose }) {
                 <input style={styles.summonInput} type="number" placeholder="95" value={minPayment} onChange={(e) => setMinPayment(e.target.value)} />
               </div>
             </div>
+
+            <label style={styles.summonLabel}>DUE DAY <span style={styles.optionalTag}>(day of month the minimum is due — powers tribute warnings)</span></label>
+            <input style={styles.summonInput} type="number" min="1" max="28" placeholder="15" value={dueDay} onChange={(e) => setDueDay(e.target.value)} />
 
             <button
               style={{ ...styles.summonBtn, width: "100%", opacity: !name.trim() || !parseFloat(total) ? 0.5 : 1 }}
@@ -1738,6 +1893,7 @@ function EditBossModal({ boss, onSave, onClose, isPremium, onUpgrade }) {
   const [apr, setApr]               = useState(String(boss.apr));
   const [minPayment, setMinPayment] = useState(String(boss.minPayment));
   const [accountLabel, setAccountLabel] = useState(boss.accountLabel || "");
+  const [dueDay, setDueDay]         = useState(boss.dueDay ? String(boss.dueDay) : "");
   const [saving, setSaving]         = useState(false);
   const meta = BOSS_TYPES[boss.type];
 
@@ -1745,6 +1901,7 @@ function EditBossModal({ boss, onSave, onClose, isPremium, onUpgrade }) {
     const r = parseFloat(remaining);
     if (!name.trim() || isNaN(r) || r < 0) return;
     setSaving(true);
+    const dd = parseInt(dueDay);
     await onSave({
       ...boss,
       name: name.trim(),
@@ -1753,6 +1910,7 @@ function EditBossModal({ boss, onSave, onClose, isPremium, onUpgrade }) {
       minPayment: parseFloat(minPayment) || 0,
       accountLabel: accountLabel.trim(),
       skin,
+      dueDay: dd >= 1 && dd <= 31 ? Math.min(dd, 28) : null,
     });
     setSaving(false);
   }
@@ -1813,6 +1971,9 @@ function EditBossModal({ boss, onSave, onClose, isPremium, onUpgrade }) {
             <input style={styles.summonInput} type="number" value={minPayment} onChange={(e) => setMinPayment(e.target.value)} />
           </div>
         </div>
+
+        <label style={styles.summonLabel}>DUE DAY <span style={styles.optionalTag}>(1–28, optional)</span></label>
+        <input style={styles.summonInput} type="number" min="1" max="28" placeholder="15" value={dueDay} onChange={(e) => setDueDay(e.target.value)} />
 
         <button style={{ ...styles.summonBtn, width: "100%", marginTop: 20 }} onClick={handleSave} disabled={saving}>
           {saving ? "Saving..." : "⚔ UPDATE THE BEAST"}
@@ -1931,6 +2092,17 @@ const styles = {
   strikeBtn: { fontFamily:"'Cinzel',serif", background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", border:"none", padding:"12px 20px", borderRadius:4, fontWeight:700, cursor:"pointer", letterSpacing:1 },
   quickRow: { display:"flex", gap:8, justifyContent:"center", marginTop:12 },
   quickBtn: { background:"transparent", border:"1px solid #3a3038", color:"#c8bca8", padding:"6px 14px", borderRadius:4, cursor:"pointer", fontFamily:"'Cinzel',serif" },
+  tributeBanner: { background: "linear-gradient(135deg,#241408,#140c06)", border: `1px solid ${EMBER}66`, borderRadius: 8, padding: "14px 18px", marginBottom: 20 },
+  tributeTitle: { margin: "0 0 10px", fontFamily: "'Cinzel',serif", fontSize: 12, letterSpacing: 3, color: EMBER },
+  tributeRow: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "7px 0", borderBottom: "1px solid #241a10", fontSize: 14, color: "#d8cdba", cursor: "pointer", flexWrap: "wrap" },
+  dueChip: { fontSize: 11, color: "#c8a85a", marginTop: 6 },
+  chartCard: { marginTop: 26, background: "linear-gradient(160deg,#140e12,#0a0608)", border: "1px solid #2a2228", borderRadius: 10, padding: "18px 20px" },
+  chartFoot: { display: "flex", justifyContent: "space-between", fontSize: 12, color: "#7a7060", marginTop: 8, fontFamily: "'Cinzel',serif" },
+  feedBox: { marginTop: 18, paddingTop: 14, borderTop: "1px solid #1f1a1f" },
+  feedLabel: { fontSize: 13, color: "#7a8a82", fontStyle: "italic", margin: "0 0 8px" },
+  feedRow: { display: "flex", alignItems: "center", gap: 8, background: "#070a09", border: "1px solid #1a4a4055", borderRadius: 6, padding: "4px 12px" },
+  feedInput: { flex: 1, background: "transparent", border: "none", color: "#c8e8da", fontSize: 18, fontFamily: "'Cinzel',serif", padding: "8px", minWidth: 0 },
+  feedBtn: { fontFamily: "'Cinzel',serif", background: "transparent", color: "#5ee8c0", border: "1px solid #1a4a40", padding: "10px 16px", borderRadius: 4, fontWeight: 700, cursor: "pointer", letterSpacing: 1, fontSize: 12 },
   aprWarn: { marginTop:16, fontSize:13, color:"#c87a5a", fontStyle:"italic" },
   victory: { marginTop:20 },
   victoryText: { fontFamily:"'Cinzel',serif", fontSize:30, color:GOLD, textShadow:`0 0 24px ${EMBER}`, margin:0 },
