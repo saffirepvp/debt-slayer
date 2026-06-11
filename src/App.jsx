@@ -126,9 +126,6 @@ function PolicyPage({ which, onBack }) {
             <p style={policyStyles.body}>{body}</p>
           </div>
         ))}
-        <p style={policyStyles.disclaimer}>
-          ⚠ These policies are starter templates to get you launched, not legal advice. Before taking real payments, have a lawyer (or a reputable policy generator) tailor them to your business and jurisdiction.
-        </p>
       </div>
     </div>
   );
@@ -143,7 +140,6 @@ const policyStyles = {
   section: { marginBottom: 24 },
   h2: { fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e8e0d4", margin: "0 0 8px" },
   body: { color: "#b8ac98", fontSize: 15, lineHeight: 1.7, margin: 0 },
-  disclaimer: { marginTop: 36, padding: "16px 20px", background: "#1c1016", border: `1px solid ${BLOOD}55`, borderRadius: 8, color: "#c8a89a", fontSize: 13.5, lineHeight: 1.65, fontStyle: "italic" },
 };
 
 // ============================================================
