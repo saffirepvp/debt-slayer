@@ -382,6 +382,7 @@ function GameApp({ user, onShowPolicy }) {
   const [showSummon, setShowSummon]   = useState(false);
   const [editBoss, setEditBoss]       = useState(null);
   const [confirmBanish, setConfirmBanish] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
   const [battleLog, setBattleLog]     = useState([]);
   const [activeBoss, setActiveBoss]   = useState(null);
   const [payAmount, setPayAmount]     = useState("");
@@ -1420,6 +1421,7 @@ function GameApp({ user, onShowPolicy }) {
                 <button style={styles.inlineLink} onClick={() => onShowPolicy("terms")}>Terms of Service</button>
                 <button style={styles.inlineLink} onClick={() => onShowPolicy("privacy")}>Privacy Policy</button>
                 <button style={styles.inlineLink} onClick={() => onShowPolicy("refunds")}>Cancellation & Refunds</button>
+                <button style={styles.inlineLink} onClick={() => setShowHelp(true)}>Contact Support</button>
               </div>
             </div>
 
@@ -1511,6 +1513,10 @@ function GameApp({ user, onShowPolicy }) {
           <div><p style={styles.toastTitle}>🎖 Achievement Unlocked</p><p style={styles.toastName}>{toast.name}</p><p style={styles.toastDesc}>{toast.desc}</p></div>
         </div>
       )}
+
+      {/* HELP BUBBLE */}
+      <button style={styles.helpBubble} onClick={() => setShowHelp(true)} title="Need help?" aria-label="Need help?">⚔</button>
+      {showHelp && <HelpModal email={user.email} onClose={() => setShowHelp(false)} />}
 
       <footer style={styles.footer}>
         Debt Slayer · a dark fantasy money RPG · signed in as {user.email || "Slayer"}
@@ -1640,6 +1646,84 @@ function PlanStat({ label, value, big, gold }) {
     <div style={{ ...styles.planStat, ...(gold ? { borderColor: GOLD, background: `${GOLD}11` } : {}) }}>
       <span style={{ ...styles.planStatValue, fontSize: big ? 26 : 20, color: gold ? GOLD : "#e8e0d4" }}>{value}</span>
       <span style={styles.planStatLabel}>{label}</span>
+    </div>
+  );
+}
+
+// ============================================================
+// HELP / CONTACT SUPPORT MODAL — delivers via Formspree
+// ============================================================
+function HelpModal({ email, onClose }) {
+  const [name, setName]       = useState("");
+  const [from, setFrom]       = useState(email || "");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent]       = useState(false);
+  const [error, setError]     = useState("");
+
+  async function handleSend() {
+    if (!message.trim()) { setError("Please write a message first."); return; }
+    setSending(true); setError("");
+    try {
+      const res = await fetch("https://formspree.io/f/mgobneer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          name: name.trim() || "Slayer",
+          email: from.trim(),
+          message: message.trim(),
+          _subject: "BossMyDebt support request",
+        }),
+      });
+      if (!res.ok) throw new Error("Send failed. Please try again, or email us directly.");
+      setSent(true);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div style={styles.summonOverlay} onClick={onClose}>
+      <div className="victory-burst" style={{ ...styles.summonCard, maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+        <button style={styles.summonClose} onClick={onClose}>✕</button>
+        {sent ? (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontSize: 50 }}>📜</div>
+            <h2 style={{ ...styles.summonTitle, marginTop: 10 }}>Your raven is away</h2>
+            <p style={styles.summonSub}>We've received your message and will reply by email as soon as we can. Slay on, Slayer.</p>
+            <button style={{ ...styles.summonBtn, marginTop: 10 }} onClick={onClose}>Close</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ textAlign: "center", fontSize: 40, marginBottom: 6 }}>⚔</div>
+            <h2 style={{ ...styles.summonTitle, marginTop: 0 }}>Need Help?</h2>
+            <p style={styles.summonSub}>Send word to the Guild. We read every message and reply by email.</p>
+
+            <label style={styles.summonLabel}>YOUR NAME <span style={styles.optionalTag}>(optional)</span></label>
+            <input style={styles.summonInput} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
+
+            <label style={styles.summonLabel}>YOUR EMAIL <span style={styles.optionalTag}>(so we can reply)</span></label>
+            <input style={styles.summonInput} type="email" value={from} onChange={(e) => setFrom(e.target.value)} maxLength={120} />
+
+            <label style={styles.summonLabel}>HOW CAN WE HELP?</label>
+            <textarea
+              style={{ ...styles.summonInput, minHeight: 110, resize: "vertical", fontFamily: "'EB Garamond',serif", lineHeight: 1.5 }}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Describe your question or issue..."
+              maxLength={2000}
+            />
+
+            {error && <p style={{ color: "#ff6b35", fontSize: 13, margin: "4px 0 0" }}>{error}</p>}
+
+            <button style={{ ...styles.summonBtn, width: "100%", marginTop: 18, opacity: sending ? 0.7 : 1 }} onClick={handleSend} disabled={sending}>
+              {sending ? "Sending..." : "📨 Send to the Guild"}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -2003,6 +2087,7 @@ const styles = {
   skinRow: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 },
   skinSwatch: { flex:"1 1 72px", minWidth:72, border:"2px solid", borderRadius:8, padding:"10px 6px 8px", cursor:"pointer", display:"flex", flexDirection:"column", gap:6 },
   skinLabel: { fontSize:10, color:"#e8e0d4", letterSpacing:1, fontFamily:"'Cinzel',serif", textAlign:"center", display:"block" },
+  helpBubble: { position:"fixed", bottom:20, right:20, width:54, height:54, borderRadius:"50%", background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", border:`2px solid ${GOLD}`, fontSize:24, cursor:"pointer", zIndex:90, boxShadow:`0 6px 24px rgba(0,0,0,.6),0 0 18px ${BLOOD}88`, display:"flex", alignItems:"center", justifyContent:"center" },
   duelRow: { display:"flex", alignItems:"flex-end", justifyContent:"center", gap:10, marginBottom:6, flexWrap:"nowrap" },
   duelSlayer: { display:"flex", flexDirection:"column", alignItems:"center", gap:4 },
   duelName: { fontFamily:"'Cinzel',serif", fontSize:11, letterSpacing:3, color:"#9a8f80" },
