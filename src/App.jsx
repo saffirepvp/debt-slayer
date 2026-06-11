@@ -1515,7 +1515,7 @@ function GameApp({ user, onShowPolicy }) {
       )}
 
       {/* HELP BUBBLE */}
-      <button style={styles.helpBubble} onClick={() => setShowHelp(true)} title="Need help?" aria-label="Need help?">⚔</button>
+      <button style={styles.helpBubble} onClick={() => setShowHelp(true)} title="Need help?" aria-label="Need help?">{"\u2694"}</button>
       {showHelp && <HelpModal email={user.email} onClose={() => setShowHelp(false)} />}
 
       <footer style={styles.footer}>
