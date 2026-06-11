@@ -1014,7 +1014,7 @@ function GameApp({ user, onShowPolicy }) {
         <div style={styles.statbar}>
           <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={42} />
           <Stat label="LVL" value={level} />
-          <Stat label="COINS" value={`🪙${coins}`} />
+          <Stat label="COINS" value={<span><span style={styles.coinGlyph}>$</span>{coins}</span>} />
           <Stat label="XP" value={xp} />
           <Stat label="SLAIN" value={`${slainCount}/${bosses.length}`} />
           {!isPremium
@@ -1351,7 +1351,7 @@ function GameApp({ user, onShowPolicy }) {
                   </div>
                 </div>
               </div>
-              <p style={{ ...styles.setLabel, marginTop: 20 }}>ARMOR SKINS — earn 🪙 by striking your debts</p>
+              <p style={{ ...styles.setLabel, marginTop: 20 }}>ARMOR SKINS — earn coins by striking your debts</p>
               <div style={styles.skinRow}>
                 {Object.entries(PALETTES).map(([key, pal]) => {
                   const owned = ownedSkins.includes(key);
@@ -1369,7 +1369,7 @@ function GameApp({ user, onShowPolicy }) {
                       <span style={{ width: 8, height: 8, borderRadius: "50%", background: pal.glow, display: "block", margin: "0 auto" }} />
                       <span style={styles.skinLabel}>{lockedPremium ? "👑 " : ""}{pal.label}</span>
                       <span style={{ ...styles.skinLabel, color: equipped ? GOLD : "#9a8f80" }}>
-                        {equipped ? "EQUIPPED" : owned ? "Equip" : lockedPremium ? "Guild only" : `🪙${cost}`}
+                        {equipped ? "EQUIPPED" : owned ? "Equip" : lockedPremium ? "Guild only" : `$${cost}`}
                       </span>
                     </button>
                   );
@@ -2087,6 +2087,7 @@ const styles = {
   skinRow: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 },
   skinSwatch: { flex:"1 1 72px", minWidth:72, border:"2px solid", borderRadius:8, padding:"10px 6px 8px", cursor:"pointer", display:"flex", flexDirection:"column", gap:6 },
   skinLabel: { fontSize:10, color:"#e8e0d4", letterSpacing:1, fontFamily:"'Cinzel',serif", textAlign:"center", display:"block" },
+  coinGlyph: { display:"inline-flex", alignItems:"center", justifyContent:"center", width:15, height:15, borderRadius:"50%", background:`linear-gradient(135deg,#f0d878,#b8902a)`, color:"#5a430a", fontSize:10, fontWeight:900, marginRight:4, verticalAlign:"middle", fontFamily:"Georgia, serif" },
   helpBubble: { position:"fixed", bottom:20, right:20, width:54, height:54, borderRadius:"50%", background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", border:`2px solid ${GOLD}`, fontSize:24, cursor:"pointer", zIndex:90, boxShadow:`0 6px 24px rgba(0,0,0,.6),0 0 18px ${BLOOD}88`, display:"flex", alignItems:"center", justifyContent:"center" },
   duelRow: { display:"flex", alignItems:"flex-end", justifyContent:"center", gap:10, marginBottom:6, flexWrap:"nowrap" },
   duelSlayer: { display:"flex", flexDirection:"column", alignItems:"center", gap:4 },
