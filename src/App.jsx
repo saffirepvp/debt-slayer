@@ -538,7 +538,6 @@ function GameApp({ user, onShowPolicy }) {
         bosses_slain: stats.bossesSlain,
         biggest_slain: stats.biggestSlain,
         counsels_used: counselsUsed,
-        is_premium: isPremium,
         reminder_day: reminderDay,
         coins,
         avatar_gender: avatarGender,
@@ -548,7 +547,7 @@ function GameApp({ user, onShowPolicy }) {
       }).then(({ error }) => { if (error) console.error("Profile save failed:", error.message); });
     }, 800);
     return () => clearTimeout(t);
-  }, [xp, stats, seasonDamage, counselsUsed, isPremium, reminderDay, coins, avatarGender, avatarSkin, ownedSkins, profileLoaded]);
+  }, [xp, stats, seasonDamage, counselsUsed, reminderDay, coins, avatarGender, avatarSkin, ownedSkins, profileLoaded]);
 
   // --- Award the season badge the moment the goal is crossed ---
   useEffect(() => {
@@ -667,6 +666,63 @@ function GameApp({ user, onShowPolicy }) {
       URL.revokeObjectURL(a.href);
     }, "image/png");
   }
+
+  // --- Stripe checkout: real money, real Guild membership ---
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  async function startCheckout() {
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, userId: user.id, email: user.email }),
+      });
+      const data = await res.json();
+      if (!data.url) throw new Error(data.error || "No checkout URL returned");
+      window.location.href = data.url;
+    } catch (e) {
+      notify("Could not open checkout: " + e.message);
+      setCheckoutLoading(false);
+    }
+  }
+
+  async function openBillingPortal() {
+    try {
+      const res = await fetch("/api/create-portal-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      const data = await res.json();
+      if (!data.url) throw new Error(data.error || "No portal URL returned");
+      window.location.href = data.url;
+    } catch (e) {
+      notify("Could not open the billing portal: " + e.message);
+    }
+  }
+
+  // After returning from checkout, poll until the webhook grants premium
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgraded") !== "1") return;
+    window.history.replaceState({}, "", "/");
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries++;
+      const { data: p } = await supabase.from("profiles").select("is_premium").eq("id", user.id).single();
+      if (p?.is_premium) {
+        clearInterval(timer);
+        setIsPremium(true);
+        setView("arena");
+        playSound("victory");
+        setToast({ sigil: "👑", name: "Welcome to the Slayer's Guild!", desc: "The full arsenal is yours. Slay well." });
+        setTimeout(() => setToast(null), 6000);
+      }
+      if (tries > 15) clearInterval(timer);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [user.id]);
 
   // --- Dungeon ambience: generated wind + low drone, no audio files ---
   function startAmbience() {
@@ -1271,7 +1327,7 @@ function GameApp({ user, onShowPolicy }) {
               {isPremium ? (
                 <>
                   <p style={styles.setText}>You're a member of the Slayer's Guild — unlimited bosses, the Battle Planner, and unlimited AI counsel are yours.</p>
-                  <button style={styles.setDangerBtn} onClick={() => notify("Once Stripe is connected, this button opens the billing portal to cancel or update payment. You keep premium until your billing period ends.")}>Manage / Cancel Subscription</button>
+                  <button style={styles.setDangerBtn} onClick={openBillingPortal}>Manage / Cancel Subscription</button>
                   <p style={styles.setHint}>Cancel anytime. You keep access until your billing period ends.</p>
                 </>
               ) : (
@@ -1401,7 +1457,10 @@ function GameApp({ user, onShowPolicy }) {
             <div style={styles.featureList}>
               {["🗺 The Battle Planner — exact payoff order, debt-free date & interest saved","🔮 Unlimited AI War Council across all 3 advisors","⚔ Unlimited bosses (free tier tracks 2)","🏆 Permanent season badges, streak ranks & achievements","🎨 Legendary boss skins — Gilded & Void"].map((f) => <div key={f} style={styles.featureItem}>{f}</div>)}
             </div>
-            <button style={styles.subscribeBtn} onClick={() => { setIsPremium(true); setView("advisor"); }}>⚔ ENLIST NOW (Demo unlock — Stripe coming next)</button>
+            <button style={{ ...styles.subscribeBtn, opacity: checkoutLoading ? 0.7 : 1 }} onClick={startCheckout} disabled={checkoutLoading}>
+              {checkoutLoading ? "Opening the vault..." : `⚔ ENLIST NOW — ${plan === "annual" ? "$29.99/year" : "$4.99/month"}`}
+            </button>
+            <p style={{ fontSize: 12, color: "#7a7060", marginTop: 12, fontStyle: "italic" }}>Secure checkout by Stripe · cancel anytime</p>
             <button style={styles.maybeLater} onClick={() => setView("arena")}>Maybe later</button>
           </div>
         )}
