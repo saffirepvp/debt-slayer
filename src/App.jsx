@@ -152,6 +152,78 @@ const policyStyles = {
 };
 
 // ============================================================
+// DEMO BATTLE — playable practice boss on the landing page
+// ============================================================
+function DemoBattle({ onEnter }) {
+  const TOTAL = 3000;
+  const [hp, setHp] = useState(TOTAL);
+  const [flash, setFlash] = useState(false);
+  const [dmgs, setDmgs] = useState([]);
+  const [strikes, setStrikes] = useState(0);
+  const dead = hp <= 0;
+
+  function demoSound(kind) {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ac = new Ctx(), now = ac.currentTime;
+      const make = (f, s, d, t = "square", v = 0.12) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, now + s);
+        g.gain.setValueAtTime(0, now + s);
+        g.gain.linearRampToValueAtTime(v, now + s + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, now + s + d);
+        o.connect(g); g.connect(ac.destination); o.start(now + s); o.stop(now + s + d);
+      };
+      if (kind === "hit")     { make(180, 0, 0.12, "sawtooth", 0.15); make(90, 0, 0.18, "square", 0.1); }
+      if (kind === "crit")    { make(220, 0, 0.1, "sawtooth", 0.18); make(330, 0.05, 0.15, "square", 0.14); }
+      if (kind === "victory") { [523, 659, 784, 1047].forEach((f, i) => make(f, i * 0.12, 0.3, "triangle", 0.14)); }
+    } catch (e) {}
+  }
+
+  function strike() {
+    if (dead) return;
+    const crit = strikes === 2 || Math.random() < 0.3;
+    const dmg = Math.min(hp, Math.round((420 + Math.random() * 480) * (crit ? 1.8 : 1)));
+    const newHp = hp - dmg;
+    setHp(newHp);
+    setStrikes((s) => s + 1);
+    setFlash(true); setTimeout(() => setFlash(false), 350);
+    const id = Date.now();
+    setDmgs((d) => [...d, { id, dmg, crit }]);
+    setTimeout(() => setDmgs((d) => d.filter((x) => x.id !== id)), 1200);
+    demoSound(newHp <= 0 ? "victory" : crit ? "crit" : "hit");
+  }
+
+  return (
+    <div style={landing.demoBattle}>
+      {!dead && <p style={landing.demoTry}>Go on — strike it. This one's just practice.</p>}
+      <div className={flash ? "shake" : ""} style={{ position: "relative", display: "inline-block" }}>
+        <BossArt type="credit" skin="blood" size={150} dead={dead} className={dead ? undefined : "boss-idle"} />
+        {dmgs.map((d) => (
+          <span key={d.id} className="float-dmg" style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: d.crit ? 38 : 26, color: d.crit ? GOLD : EMBER, textShadow: "0 0 12px #000" }}>
+            -${d.dmg.toLocaleString()}{d.crit ? "!" : ""}
+          </span>
+        ))}
+      </div>
+      <div style={landing.demoHpOuter}>
+        <div style={{ ...landing.demoHpInner, width: `${Math.max(0, hp / TOTAL) * 100}%` }} />
+        <span style={landing.demoHpLabel}>{dead ? "SLAIN" : `The Practice Wyrm · $${hp.toLocaleString()} HP`}</span>
+      </div>
+      {dead ? (
+        <div className="fade-in">
+          <p style={landing.demoSlain}>⚜ BOSS SLAIN ⚜</p>
+          <p style={landing.demoSlainSub}>Felt good, right? Now imagine that was your actual credit card.</p>
+          <button style={landing.cta} onClick={onEnter}>SUMMON YOUR REAL DEBT — FREE</button>
+        </div>
+      ) : (
+        <button style={landing.demoStrikeBtn} onClick={strike}>⚔ STRIKE THE BOSS</button>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
 // LANDING PAGE — what strangers see before signing up
 // ============================================================
 function LandingPage({ onEnter, onShowPolicy }) {
@@ -165,11 +237,12 @@ function LandingPage({ onEnter, onShowPolicy }) {
         <h1 style={landing.heroTitle}>DEBT SLAYER</h1>
         <p style={landing.heroTag}>Your debt is a monster.<br />Slay it.</p>
         <p style={landing.heroSub}>
-          Turn every credit card, student loan, and car note into an RPG boss with an HP bar.
-          Every real payment you make is a strike. Watch your debts die, one by one.
+          Every credit card, loan, and car note becomes a boss with an HP bar.
+          Every real payment is a strike. Watch your debts die.
         </p>
         <button style={landing.cta} onClick={onEnter}>🔥 BEGIN THE HUNT — FREE</button>
-        <p style={landing.ctaHint}>No card required · summon your first boss in 60 seconds</p>
+        <p style={landing.ctaHint}>Free to start · no card · no bank login — you enter your own numbers</p>
+        <DemoBattle onEnter={onEnter} />
       </div>
 
       {/* FEATURES */}
@@ -258,6 +331,14 @@ const landing = {
   footer: { textAlign: "center", padding: "40px 20px 30px", color: "#5a5048", fontSize: 12, fontStyle: "italic", lineHeight: 1.8 },
   footerLink: { background: "none", border: "none", color: "#9a8f80", cursor: "pointer", fontSize: 12, textDecoration: "underline", fontFamily: "'EB Garamond',serif" },
   footerDot: { color: "#5a5048", margin: "0 8px" },
+  demoBattle: { marginTop: 40, padding: "28px 20px 32px", background: "linear-gradient(160deg,#160e13,#0a0608)", border: `1px solid ${BLOOD}55`, borderRadius: 14, textAlign: "center" },
+  demoTry: { color: "#9a8f80", fontStyle: "italic", fontSize: 14, margin: "0 0 12px" },
+  demoHpOuter: { position: "relative", height: 24, background: "#000", borderRadius: 12, overflow: "hidden", maxWidth: 360, margin: "14px auto 18px", border: "1px solid #2a2228" },
+  demoHpInner: { height: "100%", background: `linear-gradient(90deg,${BLOOD},${EMBER})`, transition: "width .5s ease" },
+  demoHpLabel: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff", textShadow: "0 0 4px #000", fontFamily: "'Cinzel',serif", letterSpacing: 1 },
+  demoStrikeBtn: { fontFamily: "'Cinzel',serif", background: `linear-gradient(135deg,${BLOOD},${EMBER})`, color: "#fff", border: "none", padding: "15px 32px", borderRadius: 6, fontWeight: 700, fontSize: 15, cursor: "pointer", letterSpacing: 2, boxShadow: `0 4px 24px ${BLOOD}88` },
+  demoSlain: { fontFamily: "'Cinzel',serif", fontSize: 24, color: GOLD, letterSpacing: 3, textShadow: `0 0 20px ${EMBER}`, margin: "4px 0" },
+  demoSlainSub: { color: "#c8bca8", fontSize: 15, margin: "4px 0 18px" },
   faqWrap: { maxWidth: 720, margin: "50px auto", padding: "0 24px" },
   faqTitle: { fontFamily: "'Cinzel',serif", fontSize: 26, color: "#e8e0d4", textAlign: "center", margin: "0 0 24px" },
   faqItem: { background: "linear-gradient(160deg,#1a141a,#0e0a0e)", border: "1px solid #2a2228", borderRadius: 8, padding: "16px 20px", marginBottom: 12 },
