@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
-import BossArt, { PALETTES, FREE_SKINS, SlayerAvatar } from "./BossArt";
+import BossArt, { PALETTES, FREE_SKINS, SlayerAvatar, WeaponArt, WEAPONS } from "./BossArt";
 
 // ============================================================
 // DEBT SLAYER — Dark Fantasy Debt-Tracking RPG
@@ -313,7 +313,7 @@ function LandingPage({ onEnter, onShowPolicy }) {
 }
 
 const landing = {
-  page: { fontFamily: "'EB Garamond',serif", background: "radial-gradient(ellipse at top,#1a1218 0%,#0a0608 55%,#050304 100%)", minHeight: "100vh", color: "#e8e0d4", overflowX: "hidden" },
+  page: { fontFamily: "'EB Garamond',serif", background: "#050304", backgroundImage: "radial-gradient(ellipse 1200px 800px at 50% 0%,#1a1218 0%,#0a0608 55%,#050304 100%)", backgroundAttachment: "fixed", backgroundRepeat: "no-repeat", minHeight: "100vh", color: "#e8e0d4", overflowX: "hidden" },
   hero: { textAlign: "center", padding: "80px 24px 50px", maxWidth: 700, margin: "0 auto" },
   heroMark: { fontSize: 64, color: GOLD, textShadow: `0 0 32px ${EMBER}` },
   heroTitle: { fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 46, letterSpacing: 6, color: GOLD, margin: "10px 0 4px", lineHeight: 1.15, padding: "4px 0" },
@@ -505,6 +505,8 @@ function GameApp({ user, onShowPolicy }) {
   const [avatarGender, setAvatarGender] = useState("male");
   const [avatarSkin, setAvatarSkin]     = useState("blood");
   const [ownedSkins, setOwnedSkins]     = useState(["blood"]);
+  const [weapon, setWeapon]             = useState("rusted");
+  const [ownedWeapons, setOwnedWeapons] = useState(["rusted"]);
   const [ambienceOn, setAmbienceOn]     = useState(false);
   const ambienceRef = useRef(null);
   const [reminderDay, setReminderDay]   = useState(1);
@@ -612,6 +614,8 @@ function GameApp({ user, onShowPolicy }) {
         setAvatarGender(p.avatar_gender || "male");
         setAvatarSkin(p.avatar_skin || "blood");
         setOwnedSkins(Array.isArray(p.owned_avatar_skins) ? p.owned_avatar_skins : ["blood"]);
+        setWeapon(p.weapon || "rusted");
+        setOwnedWeapons(Array.isArray(p.owned_weapons) ? p.owned_weapons : ["rusted"]);
       }
       if (ach) setUnlocked(ach.map((a) => a.achievement_id));
       setProfileLoaded(true);
@@ -640,11 +644,13 @@ function GameApp({ user, onShowPolicy }) {
         avatar_gender: avatarGender,
         avatar_skin: avatarSkin,
         owned_avatar_skins: ownedSkins,
+        weapon,
+        owned_weapons: ownedWeapons,
         updated_at: new Date().toISOString(),
       }).then(({ error }) => { if (error) console.error("Profile save failed:", error.message); });
     }, 800);
     return () => clearTimeout(t);
-  }, [xp, stats, seasonDamage, counselsUsed, reminderDay, coins, avatarGender, avatarSkin, ownedSkins, profileLoaded]);
+  }, [xp, stats, seasonDamage, counselsUsed, reminderDay, coins, avatarGender, avatarSkin, ownedSkins, weapon, ownedWeapons, profileLoaded]);
 
   // --- Award the season badge the moment the goal is crossed ---
   useEffect(() => {
@@ -890,6 +896,20 @@ function GameApp({ user, onShowPolicy }) {
     setTimeout(() => setToast(null), 4000);
   }
 
+  // --- The Forge: buy/equip weapons with payment-coins ---
+  function forgeWeapon(key) {
+    const w = WEAPONS[key];
+    if (ownedWeapons.includes(key)) { setWeapon(key); playSound("achievement"); return; }
+    if (!w.free && !isPremium) { setView("paywall"); return; }
+    if (coins < w.cost) { notify(`You need ${w.cost - coins} more coins. Strike your debts to earn them!`); return; }
+    setCoins((c) => c - w.cost);
+    setOwnedWeapons((o) => [...o, key]);
+    setWeapon(key);
+    playSound("victory");
+    setToast({ sigil: "⚔", name: `${w.label} forged!`, desc: `Spent ${w.cost} coins · now equipped` });
+    setTimeout(() => setToast(null), 4000);
+  }
+
   // --- Push notification reminders ---
   function urlBase64ToUint8Array(base64String) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -1093,7 +1113,8 @@ function GameApp({ user, onShowPolicy }) {
     const newCombo = combo + 1; setCombo(newCombo);
     clearTimeout(comboTimer.current);
     comboTimer.current = setTimeout(() => setCombo(0), 4000);
-    const isCrit = newCombo >= 3 || amt >= activeBoss.minPayment * 3 || Math.random() < 0.18;
+    const weaponCritBonus = { rusted: 0, iron: 0.04, ember: 0.08, frost: 0.10, void: 0.15, gilded: 0.18 }[weapon] || 0;
+    const isCrit = newCombo >= 3 || amt >= activeBoss.minPayment * 3 || Math.random() < (0.18 + weaponCritBonus);
     dealDamage(activeBoss, amt, isCrit);
     setActiveBoss((b) => ({ ...b, remaining: Math.max(0, b.remaining - Math.min(amt, b.remaining)) }));
     setPayAmount("");
@@ -1284,7 +1305,12 @@ function GameApp({ user, onShowPolicy }) {
                 {critText && <div className="crit-pop" style={styles.critText}>{critText}</div>}
                 <div style={styles.duelRow}>
                   <div className="ds-duel-slayer" style={styles.duelSlayer}>
-                    <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={135} className="boss-idle" />
+                    <div style={{ position: "relative", display: "inline-block" }} className="boss-idle">
+                      <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={135} />
+                      <div style={{ position: "absolute", right: -6, bottom: 16, transform: hitFlash ? "rotate(-38deg)" : "rotate(-12deg)", transition: "transform .18s ease" }}>
+                        <WeaponArt id={weapon} size={70} />
+                      </div>
+                    </div>
                     <span style={styles.duelName}>YOU</span>
                   </div>
                   <span className="ds-duel-vs" style={styles.duelVs}>⚔</span>
@@ -1550,6 +1576,38 @@ function GameApp({ user, onShowPolicy }) {
                       <span style={styles.skinLabel}>{lockedPremium ? "👑 " : ""}{pal.label}</span>
                       <span style={{ ...styles.skinLabel, color: equipped ? GOLD : "#9a8f80" }}>
                         {equipped ? "EQUIPPED" : owned ? "Equip" : lockedPremium ? "Guild only" : `$${cost}`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={styles.setCard}>
+              <p style={styles.setLabel}>⚔ THE FORGE — earn coins by striking your debts</p>
+              <p style={styles.setText}>Better weapons raise your critical-strike chance and change how your blows look and sound. Equip the one you've earned.</p>
+              <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap", marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 4 }}>
+                  <SlayerAvatar gender={avatarGender} skin={avatarSkin} size={90} />
+                  <div style={{ marginLeft: -18, marginBottom: 10 }}><WeaponArt id={weapon} size={56} /></div>
+                </div>
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <p style={{ margin: 0, fontFamily: "'Cinzel',serif", color: GOLD, fontSize: 16 }}>{WEAPONS[weapon].label}</p>
+                  <p style={{ ...styles.setHint, marginTop: 4 }}>{WEAPONS[weapon].desc}</p>
+                </div>
+              </div>
+              <div style={styles.skinRow}>
+                {Object.entries(WEAPONS).map(([key, w]) => {
+                  const owned = ownedWeapons.includes(key);
+                  const lockedPremium = !w.free && !isPremium;
+                  const equipped = weapon === key;
+                  return (
+                    <button key={key} onClick={() => forgeWeapon(key)}
+                      style={{ ...styles.weaponCard, borderColor: equipped ? GOLD : "#3a3038", opacity: lockedPremium ? 0.6 : 1 }}>
+                      <WeaponArt id={key} size={46} />
+                      <span style={styles.skinLabel}>{lockedPremium ? "👑 " : ""}{w.label}</span>
+                      <span style={{ ...styles.skinLabel, color: equipped ? GOLD : "#9a8f80" }}>
+                        {equipped ? "EQUIPPED" : owned ? "Equip" : lockedPremium ? "Guild" : `$${w.cost}`}
                       </span>
                     </button>
                   );
@@ -2124,7 +2182,7 @@ input:focus { outline: 1px solid #d4af37; }
 // STYLES
 // ============================================================
 const styles = {
-  root: { fontFamily:"'EB Garamond',serif", background:"radial-gradient(ellipse at top,#1a1218 0%,#0a0608 60%,#050304 100%)", minHeight:"100vh", color:"#e8e0d4", overflowX:"hidden", width:"100%" },
+  root: { fontFamily:"'EB Garamond',serif", background:"#050304", backgroundImage:"radial-gradient(ellipse 1200px 800px at 50% 0%,#1a1218 0%,#0a0608 55%,#050304 100%)", backgroundAttachment:"fixed", backgroundRepeat:"no-repeat", minHeight:"100vh", color:"#e8e0d4", overflowX:"hidden", width:"100%" },
   header: { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"18px 28px", borderBottom:`1px solid ${GOLD}33`, flexWrap:"wrap", gap:16 },
   brand: { display:"flex", alignItems:"center", gap:14 },
   brandMark: { fontSize:38, color:GOLD, textShadow:`0 0 20px ${EMBER}` },
@@ -2338,6 +2396,7 @@ const styles = {
   planSaveTag: { position:"absolute", top:-10, right:-8, background:`linear-gradient(135deg,${BLOOD},${EMBER})`, color:"#fff", fontSize:10, padding:"3px 8px", borderRadius:4, letterSpacing:1 },
   accountTag: { fontSize:11, color:"#8a9ab0", background:"#10141c", border:"1px solid #2a3242", borderRadius:4, padding:"3px 8px", display:"inline-block", margin:"6px auto 2px", fontFamily:"'EB Garamond',serif" },
   skinRow: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 },
+  weaponCard: { flex:"1 1 80px", minWidth:80, border:"2px solid", borderRadius:8, padding:"10px 6px 8px", cursor:"pointer", display:"flex", flexDirection:"column", gap:4, alignItems:"center", background:"linear-gradient(160deg,#1a141a,#0e0a0e)" },
   skinSwatch: { flex:"1 1 72px", minWidth:72, border:"2px solid", borderRadius:8, padding:"10px 6px 8px", cursor:"pointer", display:"flex", flexDirection:"column", gap:6 },
   skinLabel: { fontSize:10, color:"#e8e0d4", letterSpacing:1, fontFamily:"'Cinzel',serif", textAlign:"center", display:"block" },
   coinGlyph: { display:"inline-flex", alignItems:"center", justifyContent:"center", width:15, height:15, borderRadius:"50%", background:`linear-gradient(135deg,#f0d878,#b8902a)`, color:"#5a430a", fontSize:10, fontWeight:900, marginRight:4, verticalAlign:"middle", fontFamily:"Georgia, serif" },

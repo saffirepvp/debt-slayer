@@ -514,3 +514,31 @@ export function SlayerAvatar({ gender = "male", skin = "blood", size = 80, class
     </svg>
   );
 }
+
+// ============================================================
+// WEAPONS — equippable, earned with payment-coins, shown in hand
+// ============================================================
+export const WEAPONS = {
+  rusted:   { label: "Rusted Blade",   cost: 0,   free: true,  blade: "#7a6a55", edge: "#9a8a72", guard: "#3a2d1a", gem: "#5a4a32", aura: null,       desc: "Where every Slayer begins." },
+  iron:     { label: "Iron Sword",     cost: 60,  free: true,  blade: "#c8c2b4", edge: "#e8e2d4", guard: "#5a5246", gem: "#8a8272", aura: null,       desc: "Honest steel. Reliable." },
+  ember:    { label: "Emberbrand",     cost: 150, free: true,  blade: "#c83018", edge: "#ff8a3a", guard: "#6a3210", gem: "#ff6b35", aura: "#ff6b35", desc: "Strikes burn with ember." },
+  frost:    { label: "Frostbite",      cost: 300, free: true,  blade: "#3a8ab0", edge: "#aeeaff", guard: "#1a4a6a", gem: "#5ec8e8", aura: "#aeeaff", desc: "Each blow bites like winter." },
+  void:     { label: "Voidreaver",     cost: 600, free: false, blade: "#4a2a78", edge: "#d8b0ff", guard: "#2a1850", gem: "#b06aff", aura: "#b06aff", desc: "Slayer's Guild · drinks the dark." },
+  gilded:   { label: "Gilded Greatsword", cost: 900, free: false, blade: "#d4af37", edge: "#fff0b8", guard: "#9a7d1e", gem: "#ffd966", aura: "#ffd966", desc: "Slayer's Guild · forged of pure gold." },
+};
+
+export function WeaponArt({ id = "rusted", size = 80 }) {
+  const w = WEAPONS[id] || WEAPONS.rusted;
+  return (
+    <svg viewBox="0 0 40 80" width={size * 0.5} height={size} style={{ display: "block", overflow: "visible" }}>
+      <g transform="translate(20 40)">
+        <path d="M 0 -34 L -4 -26 L -4 8 L 4 8 L 4 -26 Z" fill={w.blade} />
+        <path d="M 0 -34 L 0 8" stroke={w.edge} strokeWidth="1.6" />
+        <rect x="-10" y="8" width="20" height="5" rx="2" fill={w.guard} />
+        <rect x="-2.5" y="13" width="5" height="13" rx="2" fill="#241a14" />
+        <circle cx="0" cy="28" r="3.4" fill={w.gem} />
+        {w.aura && <g fill={w.aura} opacity="0.85"><circle cx="-6" cy="-16" r="1.3" className="ba-glow" /><circle cx="6" cy="-24" r="1.1" className="ba-glow" /></g>}
+      </g>
+    </svg>
+  );
+}
