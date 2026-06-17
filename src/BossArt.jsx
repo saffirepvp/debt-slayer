@@ -1,16 +1,16 @@
 import React from "react";
 
 // ============================================================
-// BOSS ART — six gritty dark-fantasy boss models, palette-driven.
-// Skins: blood/ash/spectral are free; gilded/void are Slayer's Guild.
+// BOSS ART — six shaded dark-fantasy bosses, palette-driven.
+// blood/ash/spectral free; gilded/void are Slayer's Guild.
 // ============================================================
 
 export const PALETTES = {
-  blood:    { label: "Blood",    free: true,  body1: "#5a1418", body2: "#3a0e11", body3: "#200709", fin: "#2a0a0c", finS: "#4a1216", dark: "#180406", glow: "#d8722e", bone: "#c8bfae", bone2: "#a8a08e", metal: "#a08030", metalDark: "#6a5210", scar: "#7a4a42", horn: "#241a14", horn2: "#1c130e", ash: "#8a7f72", pupil: "#120304" },
-  ash:      { label: "Ash",      free: true,  body1: "#56524a", body2: "#3a3733", body3: "#232120", fin: "#2e2c28", finS: "#4a463e", dark: "#14130f", glow: "#c8c2b0", bone: "#d8d2c4", bone2: "#b8b2a4", metal: "#8a8272", metalDark: "#5a5448", scar: "#8a857a", horn: "#2a2620", horn2: "#201d18", ash: "#9a958a", pupil: "#0e0d0b" },
-  spectral: { label: "Spectral", free: true,  body1: "#1a5a4e", body2: "#103a32", body3: "#08211c", fin: "#0c2c26", finS: "#1a4a40", dark: "#051410", glow: "#5ee8c0", bone: "#a8d8c8", bone2: "#88b8a8", metal: "#3a8a72", metalDark: "#20564a", scar: "#2a7a66", horn: "#0e2e26", horn2: "#0a2018", ash: "#6aa896", pupil: "#03100c" },
-  gilded:   { label: "Gilded",   free: false, body1: "#8a6d1e", body2: "#5a460f", body3: "#32270a", fin: "#43340c", finS: "#6a5210", dark: "#1c1404", glow: "#ffd966", bone: "#f0e6c8", bone2: "#d0c6a8", metal: "#d4af37", metalDark: "#9a7d1e", scar: "#b89440", horn: "#43340c", horn2: "#32270a", ash: "#c8b276", pupil: "#140e02" },
-  void:     { label: "Void",     free: false, body1: "#4a2a78", body2: "#301a52", body3: "#1a0e30", fin: "#241440", finS: "#3a2462", dark: "#0e0620", glow: "#b06aff", bone: "#cab8e8", bone2: "#a892c8", metal: "#7a52b8", metalDark: "#4e3280", scar: "#6a4aa0", horn: "#1c1034", horn2: "#140a26", ash: "#8a76b0", pupil: "#08041a" },
+  blood:    { label: "Blood",    free: true,  body1:"#7a1a22", body2:"#4a0e14", body3:"#220609", fin:"#2a0a0c", finS:"#5a1018", dark:"#160406", glow:"#ff6b35", glowA:"#ffd966", glowB:"#ff8a3a", glowC:"#c83018", bone:"#d8ccb4", bone2:"#b8ac94", metal:"#c8a030", metalDark:"#6a5210", scar:"#7a4a42", scar2:"#c86850", horn:"#2a1d16", horn2:"#1e140e", hi:"#8a2028", hi2:"#8a2a32", belly:"#b8884a", ash:"#8a7f72", pupil:"#120304" },
+  ash:      { label: "Ash",      free: true,  body1:"#6a665e", body2:"#46423a", body3:"#2a2824", fin:"#34322c", finS:"#56524a", dark:"#16150f", glow:"#d8d2c0", glowA:"#f0ecd8", glowB:"#e8e2cc", glowC:"#b8b2a0", bone:"#e0dccc", bone2:"#c0bcae", metal:"#9a9282", metalDark:"#5a5448", scar:"#8a857a", scar2:"#a8a290", horn:"#34302a", horn2:"#26231e", hi:"#7a766c", hi2:"#8a857a", belly:"#b0aa98", ash:"#9a958a", pupil:"#0e0d0b" },
+  spectral: { label: "Spectral", free: true,  body1:"#1a6a5a", body2:"#104a40", body3:"#082822", fin:"#0c3028", finS:"#1a5a4a", dark:"#05140f", glow:"#5ee8c0", glowA:"#aef0dc", glowB:"#7eecc8", glowC:"#2eb898", bone:"#bde8da", bone2:"#9cc8ba", metal:"#3a9a82", metalDark:"#206a56", scar:"#2a8a72", scar2:"#4aa890", horn:"#0e2e26", horn2:"#0a201a", hi:"#1a7a64", hi2:"#2a8a72", belly:"#7ab8a6", ash:"#6aa896", pupil:"#03100c" },
+  gilded:   { label: "Gilded",   free: false, body1:"#9a7d1e", body2:"#6a5210", body3:"#3a2d08", fin:"#43340c", finS:"#7a5d12", dark:"#1c1404", glow:"#ffd966", glowA:"#fff0b8", glowB:"#ffe07a", glowC:"#d4af37", bone:"#f0e6c8", bone2:"#d0c6a8", metal:"#ffd966", metalDark:"#9a7d1e", scar:"#b89440", scar2:"#d4b050", horn:"#43340c", horn2:"#32270a", hi:"#b8902a", hi2:"#c8a030", belly:"#e0c870", ash:"#c8b276", pupil:"#140e02" },
+  void:     { label: "Void",     free: false, body1:"#5a2a98", body2:"#3a1a68", body3:"#1e0e40", fin:"#281452", finS:"#4a2480", dark:"#0e0620", glow:"#b06aff", glowA:"#d8b0ff", glowB:"#c490ff", glowC:"#8a4ad8", bone:"#cab8e8", bone2:"#a892c8", metal:"#9a6ad8", metalDark:"#4e3280", scar:"#6a4aa0", scar2:"#8a5ac0", horn:"#1c1034", horn2:"#140a26", hi:"#6a3aa8", hi2:"#7a4ab8", belly:"#b890e0", ash:"#8a76b0", pupil:"#08041a" },
 };
 
 export const FREE_SKINS = Object.keys(PALETTES).filter((k) => PALETTES[k].free);
@@ -18,76 +18,74 @@ export const FREE_SKINS = Object.keys(PALETTES).filter((k) => PALETTES[k].free);
 function Usurer({ p }) {
   return (
     <g>
-<g stroke={p.bone2} strokeWidth="2.4" strokeLinecap="round" opacity="0.75">
-    <line x1="38" y1="166" x2="50" y2="162"/>
-    <line x1="146" y1="170" x2="158" y2="168"/>
-  </g>
-  <circle cx="36" cy="166" r="2.6" fill={p.bone2} opacity="0.75"/>
-  <circle cx="160" cy="168" r="2.4" fill={p.bone2} opacity="0.75"/>
-  <path d="M 152 158 a 5 5 0 1 1 8 4 l -1 4 l -6 0 z" fill={p.bone2} opacity="0.8"/>
-  <circle cx="154.5" cy="159.5" r="1.1" fill={p.pupil}/>
-  <circle cx="158.5" cy="160" r="1.1" fill={p.pupil}/>
+<defs>
+    <linearGradient id="uub" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stopColor={p.body1}/><stop offset="50%" stopColor={p.body2}/><stop offset="100%" stopColor={p.body3}/>
+    </linearGradient>
+    <radialGradient id="uueye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stopColor={p.glowA}/><stop offset="45%" stopColor={p.glowB}/><stop offset="100%" stopColor={p.glowC}/>
+    </radialGradient>
+    <radialGradient id="uucoin" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stopColor="#ffe9a0"/><stop offset="55%" stopColor="#d4af37"/><stop offset="100%" stopColor="#8a6d1e"/>
+    </radialGradient>
+    <linearGradient id="uushade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stopColor="#000" stopOpacity="0.4"/><stop offset="100%" stopColor="#000" stopOpacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="100" cy="170" rx="58" ry="9" fill="#000" opacity="0.5"/>
 
   
-  <path d="M 122 64 C 148 76 156 100 146 120 C 136 140 108 144 90 134 C 72 124 58 130 52 144 C 47 156 56 168 72 168"
-        fill="none" stroke={p.body2} strokeWidth="19" strokeLinecap="round"/>
-  <path d="M 72 168 C 84 168 92 160 88 150" fill="none" stroke={p.body3} strokeWidth="10" strokeLinecap="round"/>
+  <path d="M 124 60 C 152 72 162 96 152 116 C 142 136 114 142 94 132 C 74 122 58 128 52 144 C 47 158 58 170 74 170"
+        fill="none" stroke="url(#uub)" strokeWidth="21" strokeLinecap="round"/>
+  
+  <path d="M 124 60 C 152 72 162 96 152 116 C 142 136 114 142 94 132"
+        fill="none" stroke={p.belly} strokeWidth="6" strokeLinecap="round" strokeDasharray="3 4" opacity="0.55"/>
+  
+  <path d="M 94 132 C 74 122 58 128 52 144 C 47 158 58 170 74 170"
+        fill="none" stroke={p.dark} strokeWidth="8" strokeLinecap="round" opacity="0.4"/>
+  <path d="M 74 170 C 86 170 94 162 90 152" fill="none" stroke={p.body3} strokeWidth="11" strokeLinecap="round"/>
 
   
-  <g stroke={p.dark} strokeWidth="1.6" strokeLinecap="round" opacity="0.9">
-    <line x1="138" y1="92" x2="146" y2="100"/>
-    <line x1="142" y1="90" x2="150" y2="98"/>
-    <line x1="112" y1="134" x2="120" y2="126"/>
-  </g>
-  <g stroke={p.scar} strokeWidth="0.8" strokeLinecap="round" opacity="0.6">
-    <line x1="139" y1="91" x2="147" y2="99"/>
-    <line x1="113" y1="133" x2="121" y2="125"/>
-  </g>
+  <path d="M 134 70 L 150 54 L 147 70 L 165 62 L 156 80 L 172 80 L 158 94 L 170 104 L 154 104 L 160 118 L 144 112"
+        fill={p.fin} stroke={p.finS} strokeWidth="1.2"/>
+  <path d="M 134 70 L 150 54 L 147 70 L 158 66 L 150 80 Z" fill={p.body2} opacity="0.8"/>
 
   
-  <path d="M 134 72 L 150 58 L 146 72 L 162 66 L 154 82 L 168 82 L 156 94 L 166 102 L 152 104 L 158 116 L 144 112"
-        fill={p.fin} stroke={p.finS} strokeWidth="1" opacity="0.95"/>
-
-  
-  <g>
-    <path d="M 126 66 C 110 62 102 50 108 38 C 113 28 128 25 140 32 C 152 39 156 52 148 60 C 142 66 133 68 126 66 Z"
-          fill={p.body2} stroke={p.dark} strokeWidth="1.5"/>
-    
-    <path d="M 116 40 C 124 36 134 36 142 42 C 134 40 124 40 116 44 Z" fill={p.dark}/>
-    
-    <path d="M 112 40 C 102 32 98 20 104 10 C 105 16 108 20 112 23 L 110 26 C 114 30 118 32 121 33 Z" fill={p.horn}/>
-    <path d="M 132 32 C 130 22 134 12 142 6 C 140 14 144 20 147 25 L 142 26 C 144 30 146 32 147 33 Z" fill={p.horn2}/>
-    
-    <path d="M 144 58 C 154 60 162 58 168 51 C 167 63 154 70 143 65 Z" fill={p.dark}/>
-    <path d="M 147 60 l 1.5 8 l 4 -7 z" fill={p.bone}/>
-    <path d="M 156 58 l 0.5 6 l 3.5 -5 z" fill={p.bone2}/>
-    <path d="M 151 66 l 3 5 l 1 -6 z" fill={p.bone2}/>
-    
-    <ellipse cx="129" cy="45" rx="5.6" ry="3.8" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-    <ellipse cx="129" cy="45" rx="1.5" ry="3.2" fill={p.pupil}/>
-    
-    <ellipse cx="118" cy="48" rx="3" ry="2.4" fill={p.pupil}/>
-  </g>
+  <g stroke="#1a0507" strokeWidth="1.6" opacity="0.85"><path d="M 138 90 l 8 9"/><path d="M 143 88 l 8 9"/><path d="M 110 132 l 8 -8"/></g>
+  <g stroke={p.scar2} strokeWidth="0.7" opacity="0.6"><path d="M 139 89 l 8 9"/><path d="M 111 131 l 8 -8"/></g>
 
   
   <g>
-    <circle cx="72" cy="148" r="15" fill={p.metal} stroke={p.metalDark} strokeWidth="2"/>
-    <circle cx="72" cy="148" r="9.5" fill="none" stroke={p.metalDark} strokeWidth="1.3" opacity="0.8"/>
-    <text x="72" y="153.5" fontFamily="Georgia, serif" fontSize="14" fontWeight="bold" fill={p.metalDark} textAnchor="middle">$</text>
+    <path d="M 128 62 C 112 56 104 44 110 32 C 115 24 130 22 142 28 C 154 35 158 48 150 56 C 144 62 135 64 128 62 Z" fill="url(#uub)" stroke={p.dark} strokeWidth="1.5"/>
     
-    <path d="M 62 138 L 68 146 L 64 150 L 71 158" fill="none" stroke={p.metalDark} strokeWidth="1.4"/>
+    <path d="M 116 38 C 124 33 134 33 142 39 C 134 37 124 37 116 41 Z" fill={p.hi} opacity="0.55"/>
+    
+    <path d="M 114 36 C 104 28 100 16 106 6 C 108 14 112 20 117 24 L 114 28 C 117 31 120 33 122 34 Z" fill={p.horn}/>
+    <path d="M 134 28 C 132 18 136 8 144 2 C 142 10 146 18 149 24 L 144 26 Z" fill={p.horn2}/>
+    
+    <path d="M 146 54 C 156 56 164 54 170 47 C 168 60 155 67 144 62 Z" fill={p.dark}/>
+    <path d="M 149 56 l 1.5 8 l 4 -7 z" fill={p.bone}/>
+    <path d="M 158 54 l 1 6 l 3.5 -5 z" fill={p.bone}/>
+    <path d="M 153 62 l 3 5 l 1 -6 z" fill={p.bone2}/>
+    
+    <ellipse cx="130" cy="42" rx="6.5" ry="5" fill="url(#uueye)" className="ba-glow" style={{filter:`drop-shadow(0 0 5px ${p.glow})`}}/>
+    <ellipse cx="130" cy="42" rx="1.8" ry="4" fill={p.dark}/>
+    <ellipse cx="128" cy="40" rx="1.5" ry="1.8" fill="#fff" opacity="0.6"/>
+    <ellipse cx="118" cy="46" rx="3" ry="2.4" fill={p.dark}/>
   </g>
-  
-  <path d="M 86 152 C 84 144 78 138 70 136 C 78 140 82 146 82 154 Z" fill={p.dark}/>
 
   
-  <g fill={p.ash} opacity="0.5">
-    <circle cx="44" cy="78" r="1.4"/>
-    <circle cx="162" cy="142" r="1.1"/>
-    <circle cx="98" cy="24" r="1.0"/>
-    <circle cx="32" cy="118" r="0.9"/>
+  <g>
+    <ellipse cx="73" cy="150" rx="16" ry="16" fill="url(#uucoin)" stroke={p.metalDark} strokeWidth="2"/>
+    <ellipse cx="73" cy="150" rx="10.5" ry="10.5" fill="none" stroke={p.metalDark} strokeWidth="1.3" opacity="0.7"/>
+    <text x="73" y="156" fontFamily="Georgia, serif" fontSize="15" fontWeight="bold" fill={p.metalDark} textAnchor="middle">$</text>
+    <path d="M 64 140 a 13 13 0 0 1 18 0" fill="none" stroke="#fff" strokeWidth="1.4" opacity="0.4"/>
   </g>
-  <circle cx="120" cy="36" r="1.2" fill={p.glow} opacity="0.6"/>
+  <path d="M 88 152 C 86 144 80 138 72 136 C 80 140 84 146 84 154 Z" fill={p.dark}/>
+
+  
+  <g fill={p.glow}><circle cx="44" cy="74" r="1.6" opacity="0.8"/><circle cx="166" cy="146" r="1.3" opacity="0.7"/><circle cx="100" cy="22" r="1.2" opacity="0.6"/></g>
     </g>
   );
 }
@@ -95,47 +93,42 @@ function Usurer({ p }) {
 function Wraith({ p }) {
   return (
     <g>
-<path d="M 100 38 C 124 40 134 60 132 86 C 131 108 138 128 132 148 L 124 140 L 120 156 L 110 144 L 104 162 L 96 146 L 88 158 L 82 142 L 72 152 C 64 128 70 108 68 86 C 66 60 76 40 100 38 Z"
-        fill={p.body2}/>
-  
-  <path d="M 100 38 C 76 40 66 60 68 86 C 70 108 64 128 72 152 L 82 142 L 84 100 C 82 72 88 50 100 38 Z" fill={p.body3}/>
-  
-  <path d="M 100 30 C 122 30 132 46 130 62 C 122 56 112 54 100 54 C 88 54 78 56 70 62 C 68 46 78 30 100 30 Z" fill={p.fin}/>
-  
-  <ellipse cx="100" cy="52" rx="17" ry="14" fill={p.dark}/>
-  
-  <circle cx="93" cy="50" r="3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <circle cx="107" cy="50" r="3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  
-  <g transform="rotate(-8 100 30)">
-    <path d="M 70 30 L 100 18 L 130 30 L 100 40 Z" fill={p.horn}/>
-    <path d="M 124 28 l 6 2 l -7 3 z" fill={p.dark}/>
-    <rect x="97" y="14" width="6" height="5" fill={p.horn}/>
-    <line x1="128" y1="31" x2="136" y2="48" stroke={p.metalDark} strokeWidth="1.5"/>
-    <circle cx="136" cy="50" r="2.5" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 2px ${p.glow})`}}/>
-  </g>
-  
-  <g>
-    <rect x="74" y="96" width="52" height="16" rx="3" fill={p.bone}/>
-    <rect x="70" y="94" width="7" height="20" rx="3.5" fill={p.bone2}/>
-    <rect x="123" y="94" width="7" height="20" rx="3.5" fill={p.bone2}/>
-    
-    <line x1="82" y1="101" x2="118" y2="101" stroke={p.glow} strokeWidth="1.6" opacity="0.85"/>
-    <line x1="82" y1="106" x2="110" y2="106" stroke={p.glow} strokeWidth="1.6" opacity="0.6"/>
-    
-    <path d="M 76 96 C 75 102 76 108 79 112 L 82 110 C 80 106 79 100 80 96 Z" fill={p.bone}/>
-    <path d="M 124 96 C 125 102 124 108 121 112 L 118 110 C 120 106 121 100 120 96 Z" fill={p.bone}/>
-  </g>
-  
-  <g stroke={p.metalDark} strokeWidth="2" fill="none" opacity="0.9">
-    <circle cx="128" cy="120" r="3.2"/>
-    <circle cx="130" cy="128" r="3.2"/>
-    <circle cx="133" cy="136" r="3.2"/>
-  </g>
-  
-  <g fill={p.ash} opacity="0.5">
-    <circle cx="48" cy="70" r="1.3"/><circle cx="156" cy="96" r="1.1"/><circle cx="60" cy="150" r="1.0"/>
-  </g>
+<defs>
+<linearGradient id="wwb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={p.body1}/><stop offset="100%" stopColor={p.body3}/></linearGradient>
+<radialGradient id="wwface" cx="50%" cy="40%" r="60%"><stop offset="0%" stopColor={p.fin}/><stop offset="100%" stopColor="#000"/></radialGradient>
+<radialGradient id="wweye" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor={p.glowA}/><stop offset="50%" stopColor={p.glowB}/><stop offset="100%" stopColor={p.glowC}/></radialGradient>
+</defs>
+<ellipse cx="100" cy="172" rx="46" ry="8" fill="#000" opacity="0.45"/>
+
+<path d="M 100 40 C 126 42 138 64 134 90 C 132 112 140 134 132 156 L 122 146 L 117 162 L 106 150 L 100 166 L 94 150 L 83 162 L 78 146 L 68 156 C 60 134 68 112 66 90 C 62 64 74 42 100 40 Z" fill="url(#wwb)"/>
+<path d="M 100 40 C 74 42 62 64 66 90 C 68 112 60 134 68 156 L 78 146 L 80 100 C 78 72 86 52 100 40 Z" fill={p.dark} opacity="0.6"/>
+
+<g fill={p.glow} opacity="0.5"><circle cx="88" cy="150" r="1.3"/><circle cx="100" cy="158" r="1.3"/><circle cx="112" cy="150" r="1.3"/></g>
+
+<path d="M 100 30 C 124 30 134 48 130 66 C 120 58 110 56 100 56 C 90 56 80 58 70 66 C 66 48 76 30 100 30 Z" fill={p.body2}/>
+<path d="M 100 30 C 80 30 70 46 72 62 C 80 56 90 54 100 54 C 95 50 92 40 100 30 Z" fill={p.fin} opacity="0.8"/>
+
+<ellipse cx="100" cy="52" rx="17" ry="15" fill="url(#wwface)"/>
+<ellipse cx="93" cy="50" r="3.2" rx="3.2" ry="3.2" fill="url(#wweye)" className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+<ellipse cx="107" cy="50" rx="3.2" ry="3.2" fill="url(#wweye)" className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+
+<g transform="rotate(-8 100 28)">
+<path d="M 68 28 L 100 15 L 132 28 L 100 39 Z" fill={p.horn}/>
+<path d="M 68 28 L 100 15 L 100 39 Z" fill={p.horn2} opacity="0.6"/>
+<rect x="96" y="11" width="8" height="5" fill={p.horn}/>
+<line x1="130" y1="29" x2="139" y2="48" stroke={p.metalDark} strokeWidth="1.5"/>
+<circle cx="139" cy="50" r="2.8" fill={p.glowB} className="ba-glow" style={{filter:`drop-shadow(0 0 2px ${p.glow})`}}/>
+</g>
+
+<rect x="72" y="94" width="56" height="18" rx="3" fill={p.bone}/>
+<rect x="72" y="94" width="56" height="6" rx="3" fill={p.bone}/>
+<rect x="68" y="92" width="8" height="22" rx="4" fill={p.bone2}/>
+<rect x="124" y="92" width="8" height="22" rx="4" fill={p.bone2}/>
+<line x1="80" y1="100" x2="120" y2="100" stroke={p.glow} strokeWidth="1.8" opacity="0.85"/>
+<line x1="80" y1="106" x2="110" y2="106" stroke={p.glow} strokeWidth="1.8" opacity="0.55"/>
+
+<g stroke={p.metalDark} strokeWidth="2" fill="none" opacity="0.85"><circle cx="130" cy="122" r="3.4"/><circle cx="133" cy="131" r="3.4"/><circle cx="136" cy="140" r="3.4"/></g>
+<g fill={p.ash} opacity="0.4"><circle cx="50" cy="72" r="1.3"/><circle cx="152" cy="96" r="1.1"/></g>
     </g>
   );
 }
@@ -143,74 +136,42 @@ function Wraith({ p }) {
 function Steed({ p }) {
   return (
     <g>
-<g transform="translate(62 138) rotate(-12)">
-    <circle r="30" fill="none" stroke={p.body3} strokeWidth="9"/>
-    <circle r="30" fill="none" stroke={p.fin} strokeWidth="3"/>
-    <g stroke={p.metalDark} strokeWidth="3">
-      <line x1="0" y1="-26" x2="0" y2="26"/>
-      <line x1="-26" y1="0" x2="26" y2="0"/>
-      <line x1="-18" y1="-18" x2="18" y2="18"/>
-    </g>
-    <circle r="6.5" fill={p.metal}/>
-    <circle r="2.5" fill={p.dark}/>
-  </g>
+<defs>
+<linearGradient id="ssb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={p.body1}/><stop offset="55%" stopColor={p.body2}/><stop offset="100%" stopColor={p.body3}/></linearGradient>
+<radialGradient id="sseye" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor={p.glowA}/><stop offset="50%" stopColor={p.glowB}/><stop offset="100%" stopColor={p.glowC}/></radialGradient>
+<radialGradient id="ssgear" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#ffe9a0"/><stop offset="60%" stopColor={p.metal}/><stop offset="100%" stopColor={p.metalDark}/></radialGradient>
+</defs>
+<ellipse cx="100" cy="172" rx="52" ry="8" fill="#000" opacity="0.45"/>
 
-  
-  <path d="M 96 168 C 90 134 96 100 118 76 C 126 67 136 60 146 58 L 156 76 C 142 84 130 100 124 120 C 118 140 118 156 122 168 Z"
-        fill={p.body2}/>
-  <path d="M 96 168 C 92 138 98 106 114 82 C 106 104 102 138 106 168 Z" fill={p.body3}/>
+<g transform="translate(60 138) rotate(-12)">
+<circle r="30" fill="none" stroke={p.body3} strokeWidth="9"/>
+<circle r="30" fill="none" stroke={p.body2} strokeWidth="3"/>
+<g stroke={p.metalDark} strokeWidth="3" opacity="0.7"><line x1="0" y1="-26" x2="0" y2="26"/><line x1="-26" y1="0" x2="26" y2="0"/><line x1="-18" y1="-18" x2="18" y2="18"/></g>
+<circle r="6.5" fill="url(#ssgear)"/><circle r="2.5" fill={p.dark}/>
+</g>
 
-  
-  <g fill={p.fin} stroke={p.finS} strokeWidth="1">
-    <path d="M 120 74 L 110 56 L 122 64 L 120 46 L 132 60 L 134 42 L 142 58 Z"/>
-    <path d="M 104 102 L 92 92 L 106 94 Z"/>
-    <path d="M 96 132 L 84 126 L 98 124 Z"/>
-  </g>
+<path d="M 96 168 C 90 134 96 100 118 76 C 126 67 136 60 146 58 L 156 76 C 142 84 130 100 124 120 C 118 140 118 156 122 168 Z" fill="url(#ssb)"/>
+<path d="M 96 168 C 92 138 98 106 114 82 C 106 104 102 138 106 168 Z" fill={p.dark} opacity="0.5"/>
 
-  
-  <g>
-    <path d="M 146 58 C 158 52 168 56 172 64 C 176 72 180 84 186 94 C 190 100 188 106 182 106 C 174 106 166 100 160 92 C 152 94 144 90 140 80 C 136 70 138 62 146 58 Z"
-          fill={p.body2}/>
-    
-    <path d="M 160 92 C 164 100 172 106 180 108 C 174 112 164 110 158 104 C 154 100 154 96 156 93 Z" fill={p.body3}/>
-    
-    <path d="M 154 60 C 164 62 172 72 180 88 L 176 90 C 168 76 161 67 152 64 Z" fill={p.bone} opacity="0.4"/>
-    
-    <ellipse cx="181" cy="96" rx="2.6" ry="1.8" fill={p.dark}/>
-    
-    <g fill={p.bone}>
-      <path d="M 164 99 l 2 5 l 2.5 -4 z"/>
-      <path d="M 171 102 l 1.5 5 l 2.5 -4 z"/>
-    </g>
-    
-    <ellipse cx="153" cy="72" rx="5.4" ry="4.6" fill={p.dark}/>
-    <ellipse cx="153" cy="72" rx="3.4" ry="2.8" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-    
-    <path d="M 148 56 L 142 40 L 154 50 Z" fill={p.horn}/>
-    <path d="M 158 54 L 158 40 L 166 52 Z" fill={p.horn2}/>
-  </g>
+<g fill={p.fin} stroke={p.finS} strokeWidth="1"><path d="M 120 74 L 110 56 L 122 64 L 120 46 L 132 60 L 134 42 L 142 58 Z"/><path d="M 104 102 L 92 92 L 106 94 Z"/><path d="M 96 132 L 84 126 L 98 124 Z"/></g>
 
-  
-  <g transform="translate(118 152)">
-    <g fill={p.metalDark}>
-      <rect x="-3.5" y="-22" width="7" height="8"/>
-      <rect x="-3.5" y="14" width="7" height="8"/>
-      <rect x="-22" y="-3.5" width="8" height="7"/>
-      <rect x="14" y="-3.5" width="8" height="7"/>
-    </g>
-    <circle r="16" fill={p.metalDark}/>
-    <circle r="10.5" fill={p.metal}/>
-    <circle r="4" fill={p.dark}/>
-  </g>
+<g>
+<path d="M 146 58 C 158 52 168 56 172 64 C 176 72 180 84 186 94 C 190 100 188 106 182 106 C 174 106 166 100 160 92 C 152 94 144 90 140 80 C 136 70 138 62 146 58 Z" fill="url(#ssb)"/>
+<path d="M 160 92 C 164 100 172 106 180 108 C 174 112 164 110 158 104 C 154 100 154 96 156 93 Z" fill={p.dark}/>
+<path d="M 154 60 C 164 62 172 72 180 88 L 176 90 C 168 76 161 67 152 64 Z" fill={p.hi} opacity="0.5"/>
+<ellipse cx="181" cy="96" rx="2.6" ry="1.8" fill={p.dark}/>
+<g fill={p.bone}><path d="M 164 99 l 2 5 l 2.5 -4 z"/><path d="M 171 102 l 1.5 5 l 2.5 -4 z"/></g>
+<ellipse cx="153" cy="72" rx="5.4" ry="4.6" fill={p.dark}/>
+<ellipse cx="153" cy="72" rx="3.4" ry="2.8" fill="url(#sseye)" className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+<path d="M 148 56 L 142 40 L 154 50 Z" fill={p.horn}/><path d="M 158 54 L 158 40 L 166 52 Z" fill={p.horn2}/>
+</g>
 
-  
-  <rect x="134" y="120" width="6" height="15" rx="2" fill={p.horn} transform="rotate(22 137 127)"/>
-  <circle cx="146" cy="114" r="3" fill={p.ash} opacity="0.4"/>
-  <circle cx="152" cy="106" r="2.2" fill={p.ash} opacity="0.3"/>
-
-  <g fill={p.ash} opacity="0.5">
-    <circle cx="40" cy="84" r="1.2"/><circle cx="170" cy="140" r="1.1"/>
-  </g>
+<g transform="translate(118 152)">
+<g fill={p.metalDark}><rect x="-3.5" y="-22" width="7" height="8"/><rect x="-3.5" y="14" width="7" height="8"/><rect x="-22" y="-3.5" width="8" height="7"/><rect x="14" y="-3.5" width="8" height="7"/></g>
+<circle r="16" fill="url(#ssgear)"/><circle r="10.5" fill={p.metalDark}/><circle r="4" fill={p.dark}/>
+</g>
+<rect x="134" y="120" width="6" height="15" rx="2" fill={p.horn} transform="rotate(22 137 127)"/>
+<g fill={p.ash} opacity="0.4"><circle cx="146" cy="114" r="3"/><circle cx="152" cy="106" r="2.2"/></g>
     </g>
   );
 }
@@ -218,54 +179,32 @@ function Steed({ p }) {
 function Colossus({ p }) {
   return (
     <g>
+<defs>
+<linearGradient id="ccb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={p.body1}/><stop offset="55%" stopColor={p.body2}/><stop offset="100%" stopColor={p.body3}/></linearGradient>
+<radialGradient id="ccwin" cx="50%" cy="40%" r="60%"><stop offset="0%" stopColor={p.glowA}/><stop offset="60%" stopColor={p.glowB}/><stop offset="100%" stopColor={p.glowC}/></radialGradient>
+</defs>
+<ellipse cx="100" cy="178" rx="62" ry="9" fill="#000" opacity="0.5"/>
+
 <path d="M 38 90 C 26 96 20 112 24 132 C 27 146 36 156 48 158 L 54 142 C 46 138 42 128 44 116 C 45 106 50 98 56 94 Z" fill={p.body3}/>
-  <path d="M 162 90 C 174 96 180 112 176 132 C 173 146 164 156 152 158 L 146 142 C 154 138 158 128 156 116 C 155 106 150 98 144 94 Z" fill={p.body3}/>
-  
-  <path d="M 56 84 L 144 84 L 150 122 L 142 160 L 58 160 L 50 122 Z" fill={p.body2}/>
-  <path d="M 56 84 L 100 84 L 100 160 L 58 160 L 50 122 Z" fill={p.fin}/>
-  
-  <g stroke={p.dark} strokeWidth="2">
-    <line x1="52" y1="110" x2="148" y2="110"/>
-    <line x1="54" y1="136" x2="146" y2="136"/>
-    <line x1="84" y1="84" x2="82" y2="110"/>
-    <line x1="118" y1="110" x2="120" y2="136"/>
-    <line x1="96" y1="136" x2="94" y2="160"/>
-  </g>
-  
-  <path d="M 64 92 L 70 102 L 66 112" fill="none" stroke={p.dark} strokeWidth="1.6"/>
-  <path d="M 134 142 L 128 150 L 132 158" fill="none" stroke={p.dark} strokeWidth="1.6"/>
-  
-  <path d="M 74 30 L 74 84 L 126 84 L 126 30 L 116 30 L 116 38 L 108 38 L 108 30 L 92 30 L 92 38 L 84 38 L 84 30 Z"
-        fill={p.body2}/>
-  <path d="M 74 30 L 74 84 L 96 84 L 96 38 L 92 38 L 92 30 L 84 30 L 84 38 L 74 38 Z" fill={p.fin}/>
-  
-  <g stroke={p.dark} strokeWidth="1.4">
-    <line x1="74" y1="52" x2="126" y2="52"/>
-    <line x1="74" y1="68" x2="126" y2="68"/>
-    <line x1="96" y1="38" x2="96" y2="52"/>
-    <line x1="110" y1="52" x2="110" y2="68"/>
-  </g>
-  
-  <path d="M 86 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <path d="M 106 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  
-  <path d="M 92 84 a 8 9 0 0 1 16 0 l 0 0 l -16 0 Z" fill={p.dark}/>
-  <g stroke={p.metalDark} strokeWidth="1.6">
-    <line x1="96" y1="78" x2="96" y2="84"/>
-    <line x1="100" y1="76" x2="100" y2="84"/>
-    <line x1="104" y1="78" x2="104" y2="84"/>
-  </g>
-  
-  <g stroke={p.metalDark} strokeWidth="2.2" fill="none" opacity="0.9">
-    <circle cx="66" cy="120" r="3.4"/><circle cx="78" cy="124" r="3.4"/><circle cx="90" cy="127" r="3.4"/>
-    <circle cx="102" cy="128" r="3.4"/><circle cx="114" cy="127" r="3.4"/><circle cx="126" cy="124" r="3.4"/><circle cx="138" cy="120" r="3.4"/>
-  </g>
-  
-  <rect x="34" y="152" width="26" height="20" rx="5" fill={p.fin}/>
-  <rect x="140" y="152" width="26" height="20" rx="5" fill={p.fin}/>
-  <g fill={p.ash} opacity="0.5">
-    <circle cx="40" cy="56" r="1.2"/><circle cx="164" cy="64" r="1.1"/>
-  </g>
+<path d="M 162 90 C 174 96 180 112 176 132 C 173 146 164 156 152 158 L 146 142 C 154 138 158 128 156 116 C 155 106 150 98 144 94 Z" fill={p.body3}/>
+
+<path d="M 56 84 L 144 84 L 150 122 L 142 160 L 58 160 L 50 122 Z" fill="url(#ccb)"/>
+<path d="M 56 84 L 100 84 L 100 160 L 58 160 L 50 122 Z" fill={p.dark} opacity="0.5"/>
+<g stroke={p.dark} strokeWidth="2"><line x1="52" y1="110" x2="148" y2="110"/><line x1="54" y1="136" x2="146" y2="136"/><line x1="84" y1="84" x2="82" y2="110"/><line x1="118" y1="110" x2="120" y2="136"/></g>
+<path d="M 64 92 L 70 102 L 66 112" fill="none" stroke={p.dark} strokeWidth="1.6"/>
+
+<path d="M 74 30 L 74 84 L 126 84 L 126 30 L 116 30 L 116 38 L 108 38 L 108 30 L 92 30 L 92 38 L 84 38 L 84 30 Z" fill="url(#ccb)"/>
+<path d="M 74 30 L 74 84 L 96 84 L 96 38 L 92 38 L 92 30 L 84 30 L 84 38 L 74 38 Z" fill={p.dark} opacity="0.5"/>
+<g stroke={p.dark} strokeWidth="1.4"><line x1="74" y1="52" x2="126" y2="52"/><line x1="74" y1="68" x2="126" y2="68"/><line x1="96" y1="38" x2="96" y2="52"/><line x1="110" y1="52" x2="110" y2="68"/></g>
+
+<path d="M 86 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill="url(#ccwin)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+<path d="M 106 56 a 4 5 0 0 1 8 0 l 0 6 l -8 0 Z" fill="url(#ccwin)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+<path d="M 92 84 a 8 9 0 0 1 16 0 l -16 0 Z" fill={p.dark}/>
+<g stroke={p.metalDark} strokeWidth="1.6"><line x1="96" y1="78" x2="96" y2="84"/><line x1="100" y1="76" x2="100" y2="84"/><line x1="104" y1="78" x2="104" y2="84"/></g>
+
+<g stroke={p.metalDark} strokeWidth="2.2" fill="none" opacity="0.85"><circle cx="66" cy="120" r="3.4"/><circle cx="78" cy="124" r="3.4"/><circle cx="90" cy="127" r="3.4"/><circle cx="102" cy="128" r="3.4"/><circle cx="114" cy="127" r="3.4"/><circle cx="126" cy="124" r="3.4"/><circle cx="138" cy="120" r="3.4"/></g>
+<rect x="34" y="152" width="26" height="20" rx="5" fill={p.fin}/>
+<rect x="140" y="152" width="26" height="20" rx="5" fill={p.fin}/>
     </g>
   );
 }
@@ -273,44 +212,32 @@ function Colossus({ p }) {
 function Plague({ p }) {
   return (
     <g>
-<path d="M 100 60 C 130 62 144 84 142 112 C 141 132 148 148 140 164 L 130 154 L 126 168 L 114 156 L 108 170 L 98 156 L 90 168 L 82 154 L 72 164 C 64 148 71 132 70 112 C 68 84 74 62 100 60 Z"
-        fill={p.body2}/>
-  <path d="M 100 60 C 74 62 68 84 70 112 C 71 132 64 148 72 164 L 82 154 L 84 112 C 83 88 88 70 100 60 Z" fill={p.body3}/>
-  
-  <path d="M 80 66 L 100 78 L 120 66 L 114 58 L 86 58 Z" fill={p.fin}/>
-  
-  <ellipse cx="100" cy="38" rx="34" ry="8" fill={p.horn}/>
-  <path d="M 82 38 C 82 24 90 16 100 16 C 110 16 118 24 118 38 Z" fill={p.fin}/>
-  <path d="M 82 38 C 82 24 90 16 100 16 C 94 22 90 30 90 38 Z" fill={p.horn}/>
-  
-  <path d="M 84 44 C 84 38 92 34 100 34 C 108 34 116 38 116 44 C 116 52 110 56 104 56 L 96 56 C 90 56 84 52 84 44 Z" fill={p.dark}/>
-  <path d="M 98 48 C 106 46 118 50 126 60 C 118 60 110 58 104 56 C 100 54 97 51 98 48 Z" fill={p.bone}/>
-  <path d="M 98 48 C 104 47 112 50 120 56 C 112 55 105 53 101 51 Z" fill={p.bone2}/>
-  
-  <circle cx="95" cy="46" r="4.6" fill={p.dark} stroke={p.metalDark} strokeWidth="1.4"/>
-  <circle cx="95" cy="46" r="2.2" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  
-  <line x1="142" y1="70" x2="134" y2="166" stroke={p.horn} strokeWidth="4.5" strokeLinecap="round"/>
-  <path d="M 142 70 C 136 60 140 50 150 48 C 144 54 144 62 148 68 Z" fill={p.horn}/>
-  <circle cx="149" cy="50" r="3.4" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  
-  <g fill={p.bone}>
-    <rect x="134" y="96" width="12" height="5" rx="2.5"/>
-    <rect x="134" y="102" width="12" height="5" rx="2.5"/>
-  </g>
-  
-  <g transform="rotate(-12 56 92)">
-    <rect x="46" y="84" width="20" height="14" rx="1.5" fill={p.bone}/>
-    <line x1="50" y1="89" x2="62" y2="89" stroke={p.body2} strokeWidth="1.3"/>
-    <line x1="50" y1="93" x2="58" y2="93" stroke={p.body2} strokeWidth="1.3"/>
-  </g>
-  <g transform="rotate(9 52 124)">
-    <rect x="42" y="116" width="18" height="13" rx="1.5" fill={p.bone2}/>
-    <text x="51" y="126" fontFamily="Georgia, serif" fontSize="9" fontWeight="bold" fill={p.body2} textAnchor="middle">$</text>
-  </g>
-  <g fill={p.ash} opacity="0.5">
-    <circle cx="160" cy="120" r="1.2"/><circle cx="44" cy="60" r="1.1"/>
-  </g>
+<defs>
+<linearGradient id="ppb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={p.body1}/><stop offset="100%" stopColor={p.body3}/></linearGradient>
+<radialGradient id="ppeye" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor={p.glowA}/><stop offset="50%" stopColor={p.glowB}/><stop offset="100%" stopColor={p.glowC}/></radialGradient>
+</defs>
+<ellipse cx="100" cy="174" rx="46" ry="8" fill="#000" opacity="0.45"/>
+<path d="M 100 60 C 130 62 144 84 142 112 C 141 132 148 148 140 164 L 130 154 L 126 168 L 114 156 L 108 170 L 98 156 L 90 168 L 82 154 L 72 164 C 64 148 71 132 70 112 C 68 84 74 62 100 60 Z" fill="url(#ppb)"/>
+<path d="M 100 60 C 74 62 68 84 70 112 C 71 132 64 148 72 164 L 82 154 L 84 112 C 83 88 88 70 100 60 Z" fill={p.dark} opacity="0.6"/>
+<path d="M 80 66 L 100 78 L 120 66 L 114 58 L 86 58 Z" fill={p.fin}/>
+
+<ellipse cx="100" cy="38" rx="34" ry="8" fill={p.horn}/>
+<path d="M 82 38 C 82 24 90 16 100 16 C 110 16 118 24 118 38 Z" fill={p.horn}/>
+<path d="M 82 38 C 82 24 90 16 100 16 C 94 22 90 30 90 38 Z" fill={p.horn2}/>
+<path d="M 84 44 C 84 38 92 34 100 34 C 108 34 116 38 116 44 C 116 52 110 56 104 56 L 96 56 C 90 56 84 52 84 44 Z" fill={p.dark}/>
+
+<path d="M 98 48 C 106 46 118 50 126 60 C 118 60 110 58 104 56 C 100 54 97 51 98 48 Z" fill={p.bone}/>
+<path d="M 98 48 C 104 47 112 50 120 56 C 112 55 105 53 101 51 Z" fill={p.bone2}/>
+<circle cx="95" cy="46" r="4.6" fill={p.dark} stroke={p.metalDark} strokeWidth="1.4"/>
+<circle cx="95" cy="46" r="2.2" fill="url(#ppeye)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+
+<line x1="142" y1="70" x2="134" y2="166" stroke={p.horn} strokeWidth="4.5" strokeLinecap="round"/>
+<path d="M 142 70 C 136 60 140 50 150 48 C 144 54 144 62 148 68 Z" fill={p.horn}/>
+<circle cx="149" cy="50" r="3.4" fill="url(#ppeye)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
+<g fill={p.bone}><rect x="134" y="96" width="12" height="5" rx="2.5"/><rect x="134" y="102" width="12" height="5" rx="2.5"/></g>
+
+<g transform="rotate(-12 56 92)"><rect x="46" y="84" width="20" height="14" rx="1.5" fill={p.bone}/><line x1="50" y1="89" x2="62" y2="89" stroke={p.body2} strokeWidth="1.3"/><line x1="50" y1="93" x2="58" y2="93" stroke={p.body2} strokeWidth="1.3"/></g>
+<g transform="rotate(9 52 124)"><rect x="42" y="116" width="18" height="13" rx="1.5" fill={p.bone2}/><text x="51" y="126" fontFamily="Georgia" fontSize="9" fontWeight="bold" fill={p.body2} textAnchor="middle">$</text></g>
     </g>
   );
 }
@@ -318,126 +245,98 @@ function Plague({ p }) {
 function Shade({ p }) {
   return (
     <g>
-<path d="M 100 34 C 122 38 132 58 128 82 C 125 100 132 114 126 130 C 122 142 112 148 104 150 C 108 140 106 132 100 128 C 94 132 92 140 96 150 C 88 148 78 142 74 130 C 68 114 75 100 72 82 C 68 58 78 38 100 34 Z"
-        fill={p.body2} opacity="0.95"/>
-  <path d="M 100 34 C 78 38 68 58 72 82 C 75 100 68 114 74 130 C 78 142 88 148 96 150 C 92 140 94 132 100 128 L 100 34 Z" fill={p.body3} opacity="0.95"/>
-  
-  <path d="M 88 152 C 84 160 86 168 92 172 C 90 164 92 158 96 154 Z" fill={p.fin} opacity="0.7"/>
-  <path d="M 112 152 C 116 160 114 168 108 172 C 110 164 108 158 104 154 Z" fill={p.fin} opacity="0.55"/>
-  <path d="M 100 156 C 100 164 102 170 100 178 C 98 170 100 164 100 156 Z" fill={p.fin} opacity="0.4"/>
-  
-  <ellipse cx="100" cy="62" rx="15" ry="13" fill={p.dark}/>
-  <ellipse cx="100" cy="60" rx="5.5" ry="6.5" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
-  <ellipse cx="100" cy="60" rx="2" ry="5" fill={p.pupil}/>
-  
-  <g fill={p.fin}>
-    <path d="M 74 90 C 56 96 44 110 40 128 C 39 134 42 138 46 138 C 44 130 48 120 56 112 C 63 105 70 100 78 98 Z"/>
-    <path d="M 46 138 C 42 144 40 152 42 158 L 45 156 C 44 151 45 146 48 141 Z"/>
-    <path d="M 50 140 C 48 147 48 154 51 160 L 54 157 C 52 152 52 146 54 142 Z"/>
-    <path d="M 126 90 C 144 96 156 110 160 128 C 161 134 158 138 154 138 C 156 130 152 120 144 112 C 137 105 130 100 122 98 Z"/>
-    <path d="M 154 138 C 158 144 160 152 158 158 L 155 156 C 156 151 155 146 152 141 Z"/>
-    <path d="M 150 140 C 152 147 152 154 149 160 L 146 157 C 148 152 148 146 146 142 Z"/>
-  </g>
-  
-  <g transform="rotate(-14 144 70)">
-    <path d="M 134 62 L 154 62 L 154 78 L 148 76 L 144 80 L 140 76 L 134 78 Z" fill={p.bone}/>
-    <text x="144" y="73" fontFamily="Georgia, serif" fontSize="8" fontWeight="bold" fill={p.body2} textAnchor="middle">IOU</text>
-  </g>
-  
-  <g stroke={p.ash} strokeWidth="1.2" fill="none" opacity="0.5">
-    <path d="M 62 54 q 6 -3 12 0"/>
-    <path d="M 56 64 q 5 -2 10 0"/>
-  </g>
-  <g fill={p.ash} opacity="0.5">
-    <circle cx="160" cy="100" r="1.2"/><circle cx="40" cy="80" r="1.0"/>
-  </g>
+<defs>
+<linearGradient id="hhb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={p.body1}/><stop offset="100%" stopColor={p.body3}/></linearGradient>
+<radialGradient id="hheye" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor={p.glowA}/><stop offset="45%" stopColor={p.glowB}/><stop offset="100%" stopColor={p.glowC}/></radialGradient>
+<radialGradient id="hhface" cx="50%" cy="45%" r="60%"><stop offset="0%" stopColor={p.fin}/><stop offset="100%" stopColor="#000"/></radialGradient>
+</defs>
+<ellipse cx="100" cy="176" rx="40" ry="7" fill="#000" opacity="0.4"/>
+<path d="M 100 34 C 122 38 132 58 128 82 C 125 100 132 114 126 130 C 122 142 112 148 104 150 C 108 140 106 132 100 128 C 94 132 92 140 96 150 C 88 148 78 142 74 130 C 68 114 75 100 72 82 C 68 58 78 38 100 34 Z" fill="url(#hhb)"/>
+<path d="M 100 34 C 78 38 68 58 72 82 C 75 100 68 114 74 130 C 78 142 88 148 96 150 C 92 140 94 132 100 128 L 100 34 Z" fill={p.dark} opacity="0.55"/>
+<path d="M 88 152 C 84 160 86 168 92 172 C 90 164 92 158 96 154 Z" fill={p.fin} opacity="0.7"/>
+<path d="M 112 152 C 116 160 114 168 108 172 C 110 164 108 158 104 154 Z" fill={p.fin} opacity="0.55"/>
+<path d="M 100 156 C 100 164 102 170 100 178 C 98 170 100 164 100 156 Z" fill={p.fin} opacity="0.4"/>
+<ellipse cx="100" cy="62" rx="15" ry="13" fill="url(#hhface)"/>
+<ellipse cx="100" cy="60" rx="5.5" ry="6.5" fill="url(#hheye)" className="ba-glow" style={{filter:`drop-shadow(0 0 5px ${p.glow})`}}/>
+<ellipse cx="100" cy="60" rx="2" ry="5" fill={p.dark}/>
+<ellipse cx="98" cy="57" rx="1.4" ry="1.8" fill="#fff" opacity="0.5"/>
+<g fill={p.fin}><path d="M 74 90 C 56 96 44 110 40 128 C 39 134 42 138 46 138 C 44 130 48 120 56 112 C 63 105 70 100 78 98 Z"/><path d="M 46 138 C 42 144 40 152 42 158 L 45 156 C 44 151 45 146 48 141 Z"/><path d="M 50 140 C 48 147 48 154 51 160 L 54 157 C 52 152 52 146 54 142 Z"/><path d="M 126 90 C 144 96 156 110 160 128 C 161 134 158 138 154 138 C 156 130 152 120 144 112 C 137 105 130 100 122 98 Z"/><path d="M 154 138 C 158 144 160 152 158 158 L 155 156 C 156 151 155 146 152 141 Z"/><path d="M 150 140 C 152 147 152 154 149 160 L 146 157 C 148 152 148 146 146 142 Z"/></g>
+<g transform="rotate(-14 144 70)"><path d="M 134 62 L 154 62 L 154 78 L 148 76 L 144 80 L 140 76 L 134 78 Z" fill={p.bone}/><text x="144" y="73" fontFamily="Georgia" fontSize="8" fontWeight="bold" fill={p.body2} textAnchor="middle">IOU</text></g>
+<g stroke={p.ash} strokeWidth="1.2" fill="none" opacity="0.5"><path d="M 62 54 q 6 -3 12 0"/><path d="M 56 64 q 5 -2 10 0"/></g>
     </g>
   );
 }
 
-const MODELS = {
-  credit: Usurer,
-  student: Wraith,
-  car: Steed,
-  mortgage: Colossus,
-  medical: Plague,
-  personal: Shade,
-};
-
-export default function BossArt({ type, skin = "blood", size = 80, dead = false, className }) {
-  const p = PALETTES[skin] || PALETTES.blood;
-  const Model = MODELS[type] || Shade;
-  return (
-    <svg
-      viewBox="0 0 200 200"
-      width={size}
-      height={size}
-      className={className}
-      style={{ display: "block", filter: dead ? "grayscale(1) brightness(.65)" : "none", overflow: "visible" }}
-    >
-      <Model p={p} />
-    </svg>
-  );
-}
-
-// ============================================================
-// SLAYER AVATARS — the player's character, palette-skinned
-// ============================================================
 function SlayerM({ p }) {
   return (
     <g>
-<path d="M 66 70 C 56 100 54 136 60 168 L 70 158 L 76 172 L 84 160 L 84 96 Z" fill={p.body3}/>
-  <path d="M 134 70 C 144 100 146 136 140 168 L 130 158 L 124 172 L 116 160 L 116 96 Z" fill={p.body3}/>
+<defs>
+    <linearGradient id="smcloakM" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#3a2230"/><stop offset="100%" stopColor="#140a12"/>
+    </linearGradient>
+    <linearGradient id="smarmorM" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stopColor={p.body1}/><stop offset="55%" stopColor={p.body2}/><stop offset="100%" stopColor="#22070b"/>
+    </linearGradient>
+    <linearGradient id="smsteelM" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#e8e2d4"/><stop offset="100%" stopColor="#8a8272"/>
+    </linearGradient>
+    <radialGradient id="smhoodShadowM" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stopColor="#1a0e16"/><stop offset="100%" stopColor="#000"/>
+    </radialGradient>
+  </defs>
+
   
-  <g transform="rotate(24 128 56)">
-    <rect x="125" y="10" width="7" height="42" rx="2" fill={p.bone}/>
-    <rect x="118" y="50" width="21" height="6" rx="2" fill={p.metalDark}/>
-    <rect x="125.5" y="56" width="6" height="14" rx="2.5" fill={p.horn}/>
-    <circle cx="128.5" cy="73" r="4" fill={p.metal}/>
-  </g>
+  <path d="M 62 76 C 48 108 46 144 54 176 L 68 164 L 76 178 L 86 166 L 86 92 Z" fill="url(#smcloakM)"/>
+  <path d="M 138 76 C 152 108 154 144 146 176 L 132 164 L 124 178 L 114 166 L 114 92 Z" fill="url(#smcloakM)"/>
+  <path d="M 62 76 C 52 104 50 140 56 172 C 60 150 62 120 70 96 Z" fill="#0e0610" opacity="0.6"/>
+
   
-  <rect x="80" y="124" width="16" height="40" rx="4" fill={p.fin}/>
-  <rect x="104" y="124" width="16" height="40" rx="4" fill={p.fin}/>
-  <path d="M 78 160 L 98 160 L 98 172 L 74 172 Z" fill={p.dark}/>
-  <path d="M 102 160 L 122 160 L 126 172 L 102 172 Z" fill={p.dark}/>
+  <rect x="82" y="128" width="15" height="40" rx="4" fill="#2a0a10"/>
+  <rect x="103" y="128" width="15" height="40" rx="4" fill="#2a0a10"/>
+  <ellipse cx="89" cy="140" rx="8" ry="6" fill={p.body1}/>
+  <ellipse cx="111" cy="140" rx="8" ry="6" fill={p.body1}/>
+  <path d="M 80 162 L 99 162 L 99 174 L 76 174 Z" fill="#180408"/>
+  <path d="M 101 162 L 120 162 L 124 174 L 101 174 Z" fill="#180408"/>
+
   
-  <path d="M 76 76 L 124 76 L 120 128 L 80 128 Z" fill={p.body2}/>
-  <path d="M 76 76 L 100 76 L 100 128 L 80 128 Z" fill={p.fin}/>
+  <path d="M 76 78 C 88 74 112 74 124 78 L 120 118 C 116 128 112 132 100 132 C 88 132 84 128 80 118 Z" fill="url(#smarmorM)"/>
   
-  <g stroke={p.dark} strokeWidth="1.8">
-    <line x1="79" y1="96" x2="121" y2="96"/>
-    <line x1="81" y1="112" x2="119" y2="112"/>
-  </g>
-  <line x1="108" y1="80" x2="116" y2="90" stroke={p.dark} strokeWidth="1.6"/>
+  <path d="M 100 80 L 100 130" stroke="#180408" strokeWidth="1.5" opacity="0.7"/>
+  <path d="M 84 92 C 92 88 100 88 100 92 M 116 92 C 108 88 100 88 100 92" fill="none" stroke="#1a0509" strokeWidth="1.5" opacity="0.6"/>
+  <path d="M 82 108 L 118 108" stroke="#180408" strokeWidth="1.4" opacity="0.6"/>
   
-  <path d="M 78 78 L 120 122 L 114 126 L 76 86 Z" fill={p.horn}/>
+  <path d="M 80 84 C 86 80 92 80 94 82 L 90 104 C 86 100 82 92 80 84 Z" fill={p.hi} opacity="0.5"/>
+
   
-  <rect x="78" y="122" width="44" height="9" rx="2" fill={p.horn}/>
-  <rect x="96" y="121" width="9" height="11" rx="2" fill={p.metal}/>
-  <circle cx="86" cy="134" r="6" fill={p.metal}/>
-  <path d="M 82 130 L 90 130 L 88 127 L 84 127 Z" fill={p.metalDark}/>
+  <rect x="80" y="120" width="40" height="9" rx="2" fill="#2a1a10"/>
+  <rect x="95" y="119" width="10" height="11" rx="2" fill="#d4af37"/>
+  <rect x="97" y="121" width="6" height="7" rx="1" fill={p.metalDark}/>
+
   
-  <path d="M 66 74 C 66 64 76 60 84 64 L 84 80 C 76 82 68 80 66 74 Z" fill={p.metalDark}/>
-  <path d="M 134 74 C 134 64 124 60 116 64 L 116 80 C 124 82 132 80 134 74 Z" fill={p.metalDark}/>
-  <path d="M 66 74 C 66 64 76 60 84 64 L 84 70 C 76 67 70 69 66 74 Z" fill={p.metal}/>
-  <path d="M 134 74 C 134 64 124 60 116 64 L 116 70 C 124 67 130 69 134 74 Z" fill={p.metal}/>
+  <path d="M 62 76 C 60 64 74 58 86 64 L 84 82 C 74 84 64 82 62 76 Z" fill={p.hi}/>
+  <path d="M 138 76 C 140 64 126 58 114 64 L 116 82 C 126 84 136 82 138 76 Z" fill={p.hi}/>
+  <ellipse cx="73" cy="70" rx="9" ry="6" fill={p.hi2}/>
+  <ellipse cx="127" cy="70" rx="9" ry="6" fill={p.hi2}/>
+  <circle cx="73" cy="70" r="2" fill="#d4af37"/>
+  <circle cx="127" cy="70" r="2" fill="#d4af37"/>
+
   
-  <rect x="64" y="82" width="13" height="34" rx="6" fill={p.fin}/>
-  <rect x="123" y="82" width="13" height="34" rx="6" fill={p.fin}/>
-  <rect x="63" y="112" width="15" height="14" rx="4" fill={p.horn}/>
-  <rect x="122" y="112" width="15" height="14" rx="4" fill={p.horn}/>
+  <rect x="64" y="80" width="13" height="36" rx="6" fill="#2a0a10"/>
+  <rect x="123" y="80" width="13" height="36" rx="6" fill="#2a0a10"/>
+  <path d="M 62 108 L 78 108 L 76 124 L 64 124 Z" fill={p.body1}/>
+  <path d="M 138 108 L 122 108 L 124 124 L 136 124 Z" fill={p.body1}/>
+
   
-  <path d="M 100 28 C 116 28 124 40 122 54 C 121 64 112 70 100 70 C 88 70 79 64 78 54 C 76 40 84 28 100 28 Z" fill={p.fin}/>
-  <path d="M 100 28 C 84 28 76 40 78 54 C 79 62 85 68 93 70 C 87 64 84 56 85 46 C 86 36 92 30 100 28 Z" fill={p.body3}/>
+  <path d="M 100 26 C 118 26 128 40 126 56 C 125 67 114 74 100 74 C 86 74 75 67 74 56 C 72 40 82 26 100 26 Z" fill={p.horn}/>
+  <path d="M 100 26 C 110 26 118 34 122 46 C 116 40 108 38 100 38 C 92 38 84 40 78 46 C 82 34 90 26 100 26 Z" fill="#3a2230"/>
+  <path d="M 96 26 L 100 14 L 105 26 Z" fill={p.horn}/>
   
-  <path d="M 96 28 L 100 18 L 106 28 Z" fill={p.fin}/>
+  <ellipse cx="100" cy="52" rx="15" ry="15" fill="url(#smhoodShadowM)"/>
   
-  <path d="M 88 46 C 88 58 93 66 100 66 C 107 66 112 58 112 46 C 108 42 92 42 88 46 Z" fill={p.dark}/>
-  
-  <rect x="92" y="50" width="6" height="2.6" rx="1.3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <rect x="102" y="50" width="6" height="2.6" rx="1.3" fill={p.glow} className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  
-  <path d="M 95 62 C 98 64 102 64 105 62" fill="none" stroke={p.scar} strokeWidth="1.2" opacity="0.7"/>
+  <ellipse cx="93" cy="50" rx="4" ry="2.6" fill={p.glowB} className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+  <ellipse cx="107" cy="50" rx="4" ry="2.6" fill={p.glowB} className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+  <ellipse cx="93" cy="50" rx="1.6" ry="2.2" fill="#fff" opacity="0.7"/>
+  <ellipse cx="107" cy="50" rx="1.6" ry="2.2" fill="#fff" opacity="0.7"/>
     </g>
   );
 }
@@ -445,63 +344,82 @@ function SlayerM({ p }) {
 function SlayerF({ p }) {
   return (
     <g>
-<path d="M 70 72 C 60 102 58 138 64 168 L 73 158 L 79 172 L 86 160 L 86 96 Z" fill={p.body3}/>
-  <path d="M 130 72 C 140 102 142 138 136 168 L 127 158 L 121 172 L 114 160 L 114 96 Z" fill={p.body3}/>
+<defs>
+    <linearGradient id="sfcloakF" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#3a2230"/><stop offset="100%" stopColor="#140a12"/>
+    </linearGradient>
+    <linearGradient id="sfarmorF" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stopColor={p.body1}/><stop offset="55%" stopColor={p.body2}/><stop offset="100%" stopColor="#22070b"/>
+    </linearGradient>
+    <radialGradient id="sfhoodShadowF" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stopColor="#1a0e16"/><stop offset="100%" stopColor="#000"/>
+    </radialGradient>
+  </defs>
+
+  <path d="M 66 78 C 52 108 50 144 58 176 L 72 164 L 80 178 L 88 166 L 88 94 Z" fill="url(#sfcloakF)"/>
+  <path d="M 134 78 C 148 108 150 144 142 176 L 128 164 L 120 178 L 112 166 L 112 94 Z" fill="url(#sfcloakF)"/>
+  <path d="M 66 78 C 56 106 54 142 60 174 C 64 152 66 122 74 98 Z" fill="#0e0610" opacity="0.6"/>
+
   
-  <g transform="rotate(-24 72 56)">
-    <rect x="68" y="10" width="7" height="42" rx="2" fill={p.bone}/>
-    <rect x="61" y="50" width="21" height="6" rx="2" fill={p.metalDark}/>
-    <rect x="68.5" y="56" width="6" height="14" rx="2.5" fill={p.horn}/>
-    <circle cx="71.5" cy="73" r="4" fill={p.metal}/>
-  </g>
+  <rect x="84" y="128" width="13" height="40" rx="4" fill="#2a0a10"/>
+  <rect x="103" y="128" width="13" height="40" rx="4" fill="#2a0a10"/>
+  <ellipse cx="90" cy="140" rx="7" ry="5.5" fill={p.body1}/>
+  <ellipse cx="110" cy="140" rx="7" ry="5.5" fill={p.body1}/>
+  <path d="M 82 162 L 99 162 L 99 174 L 78 174 Z" fill="#180408"/>
+  <path d="M 101 162 L 118 162 L 122 174 L 101 174 Z" fill="#180408"/>
+
   
-  <path d="M 116 52 C 122 62 124 76 122 90 C 121 98 117 104 113 106 C 116 98 117 88 115 78 C 113 68 112 60 110 54 Z" fill={p.dark}/>
-  <g stroke={p.body2} strokeWidth="1.4" opacity="0.9">
-    <line x1="114" y1="62" x2="120" y2="66"/>
-    <line x1="113" y1="74" x2="120" y2="78"/>
-    <line x1="113" y1="86" x2="119" y2="90"/>
-  </g>
-  <circle cx="113" cy="106" r="3" fill={p.metalDark}/>
+  <path d="M 78 80 C 88 75 112 75 122 80 L 116 104 L 119 126 C 114 132 106 134 100 134 C 94 134 86 132 81 126 L 84 104 Z" fill="url(#sfarmorF)"/>
+  <path d="M 100 80 L 100 132" stroke="#180408" strokeWidth="1.4" opacity="0.6"/>
+  <path d="M 86 100 C 94 96 100 98 100 100 M 114 100 C 106 96 100 98 100 100" fill="none" stroke="#1a0509" strokeWidth="1.3" opacity="0.6"/>
+  <path d="M 84 116 L 116 116" stroke="#180408" strokeWidth="1.3" opacity="0.5"/>
+  <path d="M 82 86 C 88 82 92 82 94 84 L 90 110 C 86 104 82 94 82 86 Z" fill={p.hi} opacity="0.5"/>
+
   
-  <rect x="83" y="124" width="14" height="40" rx="4" fill={p.fin}/>
-  <rect x="103" y="124" width="14" height="40" rx="4" fill={p.fin}/>
-  <path d="M 81 158 L 99 158 L 99 172 L 77 172 Z" fill={p.dark}/>
-  <path d="M 101 158 L 119 158 L 123 172 L 101 172 Z" fill={p.dark}/>
+  <rect x="82" y="122" width="36" height="8" rx="2" fill="#2a1a10"/>
+  <rect x="95" y="121" width="10" height="10" rx="2" fill="#d4af37"/>
+
   
-  <path d="M 78 76 L 122 76 L 114 104 L 118 128 L 82 128 L 86 104 Z" fill={p.body2}/>
-  <path d="M 78 76 L 100 76 L 100 128 L 82 128 L 86 104 Z" fill={p.fin}/>
-  <g stroke={p.dark} strokeWidth="1.8">
-    <path d="M 84 98 L 116 98"/>
-    <line x1="84" y1="114" x2="116" y2="114"/>
-  </g>
-  <line x1="106" y1="80" x2="112" y2="88" stroke={p.dark} strokeWidth="1.5"/>
+  <path d="M 66 78 C 64 67 77 61 88 66 L 86 82 C 77 84 68 82 66 78 Z" fill={p.hi}/>
+  <path d="M 134 78 C 136 67 123 61 112 66 L 114 82 C 123 84 132 82 134 78 Z" fill={p.hi}/>
+  <ellipse cx="76" cy="72" rx="7.5" ry="5" fill={p.hi2}/>
+  <ellipse cx="124" cy="72" rx="7.5" ry="5" fill={p.hi2}/>
+  <circle cx="76" cy="72" r="1.8" fill="#d4af37"/>
+  <circle cx="124" cy="72" r="1.8" fill="#d4af37"/>
+
+  <rect x="68" y="80" width="12" height="34" rx="6" fill="#2a0a10"/>
+  <rect x="120" y="80" width="12" height="34" rx="6" fill="#2a0a10"/>
+  <path d="M 66 106 L 80 106 L 78 122 L 68 122 Z" fill={p.body1}/>
+  <path d="M 134 106 L 120 106 L 122 122 L 132 122 Z" fill={p.body1}/>
+
   
-  <path d="M 80 78 L 118 122 L 112 126 L 78 86 Z" fill={p.horn}/>
+  <path d="M 78 56 C 72 72 72 90 78 104 C 74 92 74 74 80 60 Z" fill={p.horn2}/>
+  <path d="M 122 56 C 128 72 128 90 122 104 C 126 92 126 74 120 60 Z" fill={p.horn2}/>
+
   
-  <rect x="80" y="122" width="40" height="8" rx="2" fill={p.horn}/>
-  <rect x="96" y="121" width="8" height="10" rx="2" fill={p.metal}/>
-  <circle cx="88" cy="133" r="5.5" fill={p.metal}/>
+  <path d="M 100 28 C 116 28 125 41 123 56 C 122 66 112 73 100 73 C 88 73 78 66 77 56 C 75 41 84 28 100 28 Z" fill={p.horn}/>
+  <path d="M 100 28 C 109 28 117 35 121 46 C 115 40 108 38 100 38 C 92 38 85 40 79 46 C 83 35 91 28 100 28 Z" fill="#3a2230"/>
+  <path d="M 96 28 L 100 17 L 104 28 Z" fill={p.horn}/>
+  <ellipse cx="100" cy="52" rx="14" ry="14" fill="url(#sfhoodShadowF)"/>
   
-  <path d="M 70 74 C 70 65 79 61 86 65 L 86 79 C 79 81 72 79 70 74 Z" fill={p.metalDark}/>
-  <path d="M 130 74 C 130 65 121 61 114 65 L 114 79 C 121 81 128 79 130 74 Z" fill={p.metalDark}/>
-  <path d="M 70 74 C 70 65 79 61 86 65 L 86 70 C 79 67 74 69 70 74 Z" fill={p.metal}/>
-  <path d="M 130 74 C 130 65 121 61 114 65 L 114 70 C 121 67 126 69 130 74 Z" fill={p.metal}/>
-  
-  <rect x="68" y="82" width="12" height="33" rx="6" fill={p.fin}/>
-  <rect x="120" y="82" width="12" height="33" rx="6" fill={p.fin}/>
-  <rect x="67" y="110" width="14" height="13" rx="4" fill={p.horn}/>
-  <rect x="119" y="110" width="14" height="13" rx="4" fill={p.horn}/>
-  
-  <path d="M 100 30 C 115 30 122 41 120 54 C 119 63 111 69 100 69 C 89 69 81 63 80 54 C 78 41 85 30 100 30 Z" fill={p.fin}/>
-  <path d="M 100 30 C 85 30 78 41 80 54 C 81 61 86 67 93 69 C 88 63 85 55 86 46 C 87 37 93 31 100 30 Z" fill={p.body3}/>
-  <path d="M 96 30 L 100 21 L 105 30 Z" fill={p.fin}/>
-  
-  <path d="M 89 46 C 89 57 93 64 100 64 C 107 64 111 57 111 46 C 107 43 93 43 89 46 Z" fill={p.dark}/>
-  
-  <rect x="92.5" y="50" width="5.5" height="2.4" rx="1.2" fill={p.glow} transform="rotate(-4 95 51)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <rect x="102" y="50" width="5.5" height="2.4" rx="1.2" fill={p.glow} transform="rotate(4 105 51)" className="ba-glow" style={{filter:`drop-shadow(0 0 3px ${p.glow})`}}/>
-  <path d="M 96 61 C 98.5 62.5 101.5 62.5 104 61" fill="none" stroke={p.scar} strokeWidth="1.1" opacity="0.7"/>
+  <ellipse cx="93.5" cy="50" rx="3.6" ry="2.3" fill={p.glowB} transform="rotate(-3 93.5 50)" className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+  <ellipse cx="106.5" cy="50" rx="3.6" ry="2.3" fill={p.glowB} transform="rotate(3 106.5 50)" className="ba-glow" style={{filter:`drop-shadow(0 0 4px ${p.glow})`}}/>
+  <ellipse cx="93.5" cy="50" rx="1.4" ry="2" fill="#fff" opacity="0.7"/>
+  <ellipse cx="106.5" cy="50" rx="1.4" ry="2" fill="#fff" opacity="0.7"/>
     </g>
+  );
+}
+
+const MODELS = { credit: Usurer, student: Wraith, car: Steed, mortgage: Colossus, medical: Plague, personal: Shade };
+
+export default function BossArt({ type, skin = "blood", size = 80, dead = false, className }) {
+  const p = PALETTES[skin] || PALETTES.blood;
+  const Model = MODELS[type] || Shade;
+  return (
+    <svg viewBox="0 0 200 200" width={size} height={size} className={className}
+      style={{ display: "block", filter: dead ? "grayscale(1) brightness(.6)" : "none", overflow: "visible" }}>
+      <Model p={p} />
+    </svg>
   );
 }
 
@@ -515,16 +433,13 @@ export function SlayerAvatar({ gender = "male", skin = "blood", size = 80, class
   );
 }
 
-// ============================================================
-// WEAPONS — equippable, earned with payment-coins, shown in hand
-// ============================================================
 export const WEAPONS = {
-  rusted:   { label: "Rusted Blade",   cost: 0,   free: true,  blade: "#7a6a55", edge: "#9a8a72", guard: "#3a2d1a", gem: "#5a4a32", aura: null,       desc: "Where every Slayer begins." },
-  iron:     { label: "Iron Sword",     cost: 60,  free: true,  blade: "#c8c2b4", edge: "#e8e2d4", guard: "#5a5246", gem: "#8a8272", aura: null,       desc: "Honest steel. Reliable." },
-  ember:    { label: "Emberbrand",     cost: 150, free: true,  blade: "#c83018", edge: "#ff8a3a", guard: "#6a3210", gem: "#ff6b35", aura: "#ff6b35", desc: "Strikes burn with ember." },
-  frost:    { label: "Frostbite",      cost: 300, free: true,  blade: "#3a8ab0", edge: "#aeeaff", guard: "#1a4a6a", gem: "#5ec8e8", aura: "#aeeaff", desc: "Each blow bites like winter." },
-  void:     { label: "Voidreaver",     cost: 600, free: false, blade: "#4a2a78", edge: "#d8b0ff", guard: "#2a1850", gem: "#b06aff", aura: "#b06aff", desc: "Slayer's Guild · drinks the dark." },
-  gilded:   { label: "Gilded Greatsword", cost: 900, free: false, blade: "#d4af37", edge: "#fff0b8", guard: "#9a7d1e", gem: "#ffd966", aura: "#ffd966", desc: "Slayer's Guild · forged of pure gold." },
+  rusted:   { label: "Rusted Blade",      cost: 0,   free: true,  blade:"#7a6a55", edge:"#9a8a72", guard:"#3a2d1a", gem:"#5a4a32", aura:null,      desc:"Where every Slayer begins." },
+  iron:     { label: "Iron Sword",        cost: 60,  free: true,  blade:"#c8c2b4", edge:"#e8e2d4", guard:"#5a5246", gem:"#8a8272", aura:null,      desc:"Honest steel. Reliable." },
+  ember:    { label: "Emberbrand",        cost: 150, free: true,  blade:"#c83018", edge:"#ff8a3a", guard:"#6a3210", gem:"#ff6b35", aura:"#ff6b35", desc:"Strikes burn with ember." },
+  frost:    { label: "Frostbite",         cost: 300, free: true,  blade:"#3a8ab0", edge:"#aeeaff", guard:"#1a4a6a", gem:"#5ec8e8", aura:"#aeeaff", desc:"Each blow bites like winter." },
+  void:     { label: "Voidreaver",        cost: 600, free: false, blade:"#4a2a78", edge:"#d8b0ff", guard:"#2a1850", gem:"#b06aff", aura:"#b06aff", desc:"Slayer's Guild · drinks the dark." },
+  gilded:   { label: "Gilded Greatsword", cost: 900, free: false, blade:"#d4af37", edge:"#fff0b8", guard:"#9a7d1e", gem:"#ffd966", aura:"#ffd966", desc:"Slayer's Guild · forged of pure gold." },
 };
 
 export function WeaponArt({ id = "rusted", size = 80 }) {
